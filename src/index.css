@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Industrial Dark Palette - Deep & Sophisticated */
+  --color-industrial-dark-base: #05070A;
+  --color-industrial-dark-card: #0D1117;
+  --color-industrial-dark-hover: #161B22;
+  --color-industrial-dark-primary: #3B82F6;
+  --color-industrial-dark-accent: #10B981;
+
+  /* Industrial Light Palette - Clean & Professional */
+  --color-industrial-light-base: #F8FAFC;
+  --color-industrial-light-card: #FFFFFF;
+  --color-industrial-light-hover: #F1F5F9;
+  --color-industrial-light-primary: #2563EB;
+
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+}
+
+@layer base {
+  :root {
+    --background: var(--color-industrial-light-base);
+    --foreground: #0F172A;
+    --card: var(--color-industrial-light-card);
+    --card-foreground: #0F172A;
+    --primary: var(--color-industrial-light-primary);
+    --primary-foreground: #FFFFFF;
+    --accent: #10B981;
+    --muted: #64748B;
+    --border: #E2E8F0;
+    --glow: rgba(37, 99, 235, 0.1);
+    --bg-overlay: 248, 250, 252;
+  }
+
+  .dark {
+    --background: var(--color-industrial-dark-base);
+    --foreground: #F8FAFC;
+    --card: var(--color-industrial-dark-card);
+    --card-foreground: #F8FAFC;
+    --primary: var(--color-industrial-dark-primary);
+    --primary-foreground: #FFFFFF;
+    --accent: var(--color-industrial-dark-accent);
+    --muted: #94A3B8;
+    --border: #21262D;
+    --glow: rgba(59, 130, 246, 0.15);
+    --bg-overlay: 5, 7, 10;
+  }
+
+  body {
+    @apply bg-[var(--background)] text-[var(--foreground)] font-sans transition-colors duration-500 antialiased;
+    background-image: linear-gradient(to right, rgba(var(--bg-overlay), 0.95) 0%, rgba(var(--bg-overlay), 0.8) 50%, rgba(var(--bg-overlay), 0.4) 100%), url('/forest.png');
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: 25% center;
+  }
+
+  h1, h2, h3, h4 {
+    @apply tracking-tight font-bold;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/40 backdrop-blur-xl border border-white/20 shadow-xl;
+  }
+  .dark .glass {
+    @apply bg-black/40 backdrop-blur-xl border border-white/5 shadow-2xl;
+  }
+  
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-[var(--foreground)] to-[var(--muted)];
+  }
+
+  .bg-mesh {
+    background-image: 
+      radial-gradient(at 0% 0%, var(--glow) 0, transparent 50%), 
+      radial-gradient(at 100% 100%, var(--glow) 0, transparent 50%);
+  }
+}
