@@ -11,7 +11,7 @@ export function Architecture() {
       desc: 'Punto de entrada único con autenticación centralizada y enrutamiento inteligente.' 
     },
     { 
-      title: 'Backen Admin', 
+      title: 'Backend Admin', 
       icon: Cpu, 
       desc: 'El núcleo operativo del ecosistema. Desde aquí se gobierna la configuración, la seguridad, la auditoría y el funcionamiento integral del sistema.' 
     },
