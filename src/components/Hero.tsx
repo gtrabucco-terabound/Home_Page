@@ -13,10 +13,15 @@ export function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-8 leading-[1.05] text-gradient">
-              No construimos software. <br />
-              <span className="text-[var(--foreground)]">Construimos ecosistemas vivos.</span>
-            </h1>
+            <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-8 leading-[1.05]">
+  No construimos{" "}
+  <span className="text-[var(--primary)]">software</span>. <br />
+  Construimos{" "}
+  <span className="text-[var(--accent)] font-extrabold">
+    ecosistemas
+  </span>{" "}
+  vivos.
+</h1>
             
             <p className="text-xl md:text-2xl text-[var(--muted)] mb-12 max-w-3xl mx-auto leading-relaxed font-medium">
               Terabound rediseña cómo operan las empresas industriales creando ecosistemas donde datos, procesos y micro sistemas nacen conectados desde el origen.
