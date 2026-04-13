@@ -6,7 +6,7 @@ export function Logo({ className = "" }: { className?: string }) {
       <img 
         src="/logo.png" 
         alt="Terabound Logo" 
-        className="h-16 w-auto object-contain"
+        className="h-20 w-auto object-contain"
         referrerPolicy="no-referrer"
       />
     </div>
