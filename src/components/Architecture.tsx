@@ -13,7 +13,7 @@ export function Architecture() {
     { 
       title: 'Backen Admin', 
       icon: Cpu, 
-      desc: 'El cerebro del sistema. Control plane para configuración, seguridad, auditoría y gobierno.' 
+      desc: 'El núcleo operativo del ecosistema. Desde aquí se gobierna la configuración, la seguridad, la auditoría y el funcionamiento integral del sistema.' 
     },
     { 
       title: 'Micro Apps', 

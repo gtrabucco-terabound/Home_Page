@@ -13,7 +13,7 @@ export function SoftwareFactory() {
     {
       title: 'Expertos de Dominio',
       icon: Users,
-      desc: 'Ingenieros que hablan el lenguaje del petróleo y la energía.',
+      desc: 'Expertos que entienden cómo funcionan las operaciones reales y diseñan soluciones que se integran de forma natural en el ecosistema del negocio.',
     },
     {
       title: 'Integración Legacy',

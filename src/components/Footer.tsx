@@ -51,7 +51,7 @@ export function Footer() {
             <ul className="space-y-4 text-[var(--muted)]">
               <li className="flex items-center gap-3"><Mail size={18} /> info@terabound.com</li>
               <li className="flex items-center gap-3"><Phone size={18} /> +1 (555) 000-0000</li>
-              <li className="flex items-center gap-3"><MapPin size={18} /> Houston, TX / Bogotá, COL</li>
+              <li className="flex items-center gap-3"><MapPin size={18} /> Ciudad Autónoma de Buenos Aires, CABA / Buenos Aires, AR</li>
             </ul>
           </div>
         </div>
