@@ -18,7 +18,7 @@ export function Navbar() {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--background)]/80 backdrop-blur-md">
+    <nav aria-label="Navegación principal" className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--background)]/80 backdrop-blur-md">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         <Logo />
 
@@ -40,32 +40,42 @@ export function Navbar() {
           <div className="flex items-center bg-[var(--card)] border border-[var(--border)] rounded-full p-1">
             <button
               onClick={() => setTheme('light')}
+              aria-label="Tema claro"
+              aria-pressed={theme === 'light'}
               className={`p-1.5 rounded-full transition-all ${theme === 'light' ? 'bg-[var(--primary)] text-white' : 'text-[var(--muted)] hover:text-[var(--foreground)]'}`}
             >
               <Sun size={16} />
             </button>
             <button
               onClick={() => setTheme('dark')}
+              aria-label="Tema oscuro"
+              aria-pressed={theme === 'dark'}
               className={`p-1.5 rounded-full transition-all ${theme === 'dark' ? 'bg-[var(--primary)] text-white' : 'text-[var(--muted)] hover:text-[var(--foreground)]'}`}
             >
               <Moon size={16} />
             </button>
             <button
               onClick={() => setTheme('system')}
+              aria-label="Tema del sistema"
+              aria-pressed={theme === 'system'}
               className={`p-1.5 rounded-full transition-all ${theme === 'system' ? 'bg-[var(--primary)] text-white' : 'text-[var(--muted)] hover:text-[var(--foreground)]'}`}
             >
               <Monitor size={16} />
             </button>
           </div>
 
-          <Button variant="primary" size="sm" className="hidden md:flex opacity-0">
-            Solicitar Demo
-          </Button>
+          <a href="#contacto" className="hidden md:flex">
+            <Button variant="primary" size="sm">
+              Solicitar Demo
+            </Button>
+          </a>
 
           {/* Mobile Menu Toggle */}
           <button
             className="md:hidden p-2 text-[var(--foreground)]"
             onClick={() => setIsOpen(!isOpen)}
+            aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
+            aria-expanded={isOpen}
           >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -92,9 +102,11 @@ export function Navbar() {
                   {link.name}
                 </a>
               ))}
-              <Button variant="primary" className="w-full">
-                Solicitar Demo
-              </Button>
+              <a href="#contacto" onClick={() => setIsOpen(false)} className="w-full">
+                <Button variant="primary" className="w-full">
+                  Solicitar Demo
+                </Button>
+              </a>
             </div>
           </motion.div>
         )}

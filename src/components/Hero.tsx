@@ -27,13 +27,17 @@ export function Hero() {
               Terabound rediseña cómo operan las empresas industriales creando ecosistemas donde datos, procesos y micro sistemas nacen conectados desde el origen.
             </p>
             
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 opacity-0">
-              <Button size="lg" className="w-full sm:w-auto px-8 py-4 text-lg shadow-2xl shadow-[var(--primary)]/20">
-                Explorar soluciones
-              </Button>
-              <Button variant="outline" size="lg" className="w-full sm:w-auto px-8 py-4 text-lg gap-2 group">
-                Ver arquitectura <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-              </Button>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+              <a href="#ecosistema" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full sm:w-auto px-8 py-4 text-lg shadow-2xl shadow-[var(--primary)]/20">
+                  Explorar soluciones
+                </Button>
+              </a>
+              <a href="#arquitectura" className="w-full sm:w-auto">
+                <Button variant="outline" size="lg" className="w-full sm:w-auto px-8 py-4 text-lg gap-2 group">
+                  Ver arquitectura <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </a>
             </div>
           </motion.div>
         </div>

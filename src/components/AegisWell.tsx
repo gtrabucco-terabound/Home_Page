@@ -31,6 +31,42 @@ const modules: (ModuleData & { icon: any })[] = [
       'Trazabilidad por elemento: quién, cuándo y por qué cambió de estado',
       'Cumple API 14B, NORSOK D-010 e ISO/TS 16530-2',
     ],
+    walkthrough: [
+      {
+        duration: 2400,
+        cursor: { x: 6, y: 28 },
+        callout: { x: 24, y: 22, text: 'Cada pozo se modela con su esquemático real' },
+      },
+      {
+        duration: 3200,
+        cursor: { x: 40, y: 16 },
+        zoom: { x: 42, y: 18, scale: 1.4 },
+        callout: { x: 65, y: 30, text: 'Barrera secundaria: Wellhead / Xmas tree' },
+      },
+      {
+        duration: 3200,
+        cursor: { x: 52, y: 82 },
+        zoom: { x: 52, y: 80, scale: 1.4 },
+        callout: { x: 28, y: 64, text: 'Barrera primaria: Plug / Tapón' },
+      },
+      {
+        duration: 3200,
+        cursor: { x: 88, y: 24 },
+        zoom: { x: 86, y: 28, scale: 1.4 },
+        callout: { x: 60, y: 22, text: 'Cada elemento sellante con su estado de integridad' },
+      },
+      {
+        duration: 2800,
+        cursor: { x: 95, y: 6 },
+        click: true,
+        zoom: { x: 80, y: 10, scale: 1.3 },
+        callout: { x: 45, y: 22, text: 'Esquema validado y publicado, sin Excel paralelos' },
+      },
+      {
+        duration: 2000,
+        callout: { x: 50, y: 50, text: 'Una sola fuente de verdad sobre qué contiene el pozo' },
+      },
+    ],
   },
   {
     id: 'scada',
@@ -46,6 +82,48 @@ const modules: (ModuleData & { icon: any })[] = [
       'Umbrales derivados de MAASP y norma; override sólo para endurecer',
       'Motor de alarmas con escalamiento automático a anomalía',
       'Latencia menor a 1 segundo entre evento de campo y notificación',
+    ],
+    walkthrough: [
+      {
+        duration: 2400,
+        cursor: { x: 10, y: 12 },
+        callout: { x: 30, y: 24, text: 'Estado global de integridad, monitoreado en vivo' },
+      },
+      {
+        duration: 3200,
+        cursor: { x: 14, y: 12 },
+        zoom: { x: 18, y: 14, scale: 1.4 },
+        callout: { x: 50, y: 26, text: 'KPIs de integridad y pruebas al día' },
+      },
+      {
+        duration: 3200,
+        cursor: { x: 32, y: 30 },
+        zoom: { x: 34, y: 30, scale: 1.4 },
+        callout: { x: 62, y: 20, text: 'Anomalías priorizadas automáticamente' },
+      },
+      {
+        duration: 3200,
+        cursor: { x: 86, y: 30 },
+        click: true,
+        zoom: { x: 82, y: 30, scale: 1.4 },
+        callout: { x: 50, y: 18, text: 'Eventos críticos escalados a acción inmediata' },
+      },
+      {
+        duration: 3200,
+        cursor: { x: 45, y: 72 },
+        zoom: { x: 48, y: 74, scale: 1.3 },
+        callout: { x: 70, y: 58, text: 'Ranking de pozos por riesgo y estado' },
+      },
+      {
+        duration: 3000,
+        cursor: { x: 52, y: 78 },
+        zoom: { x: 52, y: 78, scale: 1.5 },
+        callout: { x: 28, y: 64, text: 'Pozos sin barrera resaltados al instante' },
+      },
+      {
+        duration: 2000,
+        callout: { x: 50, y: 50, text: 'Monitoreo y alarmas en una sola vista' },
+      },
     ],
   },
   {
@@ -145,6 +223,48 @@ const modules: (ModuleData & { icon: any })[] = [
       'Interpretación legible sobre la matriz para el lector no técnico',
       'Acciones disparadas cuando RPN supera umbral',
     ],
+    walkthrough: [
+      {
+        duration: 2400,
+        cursor: { x: 8, y: 14 },
+        callout: { x: 30, y: 26, text: 'Reporte de integridad vivo por pozo' },
+      },
+      {
+        duration: 3200,
+        cursor: { x: 12, y: 18 },
+        zoom: { x: 16, y: 20, scale: 1.4 },
+        callout: { x: 50, y: 30, text: 'Estado operativo calculado, no declarado a mano' },
+      },
+      {
+        duration: 3200,
+        cursor: { x: 42, y: 18 },
+        zoom: { x: 44, y: 20, scale: 1.4 },
+        callout: { x: 70, y: 30, text: 'Barrera primaria en falla, con su evidencia' },
+      },
+      {
+        duration: 3200,
+        cursor: { x: 12, y: 48 },
+        zoom: { x: 30, y: 50, scale: 1.3 },
+        callout: { x: 55, y: 38, text: 'FMECA vivo: top componentes por RPN' },
+      },
+      {
+        duration: 3200,
+        cursor: { x: 80, y: 64 },
+        click: true,
+        zoom: { x: 80, y: 64, scale: 1.5 },
+        callout: { x: 45, y: 50, text: 'RPN recalculado ante cada evento o anomalía' },
+      },
+      {
+        duration: 3000,
+        cursor: { x: 26, y: 72 },
+        zoom: { x: 28, y: 72, scale: 1.4 },
+        callout: { x: 60, y: 58, text: 'Cruzado contra el esquemático real del pozo' },
+      },
+      {
+        duration: 2000,
+        callout: { x: 50, y: 50, text: 'Riesgo siempre actualizado, nunca archivado' },
+      },
+    ],
   },
   {
     id: 'compliance',
@@ -161,6 +281,42 @@ const modules: (ModuleData & { icon: any })[] = [
       'Generación de reportes regulatorios en PDF',
       'Histórico inmutable para auditoría externa',
     ],
+    walkthrough: [
+      {
+        duration: 2400,
+        cursor: { x: 8, y: 14 },
+        callout: { x: 32, y: 26, text: 'Checklist API 14B / NORSOK aplicado al pozo real' },
+      },
+      {
+        duration: 3200,
+        cursor: { x: 55, y: 30 },
+        zoom: { x: 55, y: 30, scale: 1.4 },
+        callout: { x: 30, y: 18, text: 'Reglas OK, advertencias y críticas separadas' },
+      },
+      {
+        duration: 3400,
+        cursor: { x: 50, y: 42 },
+        zoom: { x: 48, y: 44, scale: 1.4 },
+        callout: { x: 72, y: 32, text: 'Brechas críticas con la norma citada' },
+      },
+      {
+        duration: 3200,
+        cursor: { x: 50, y: 72 },
+        zoom: { x: 48, y: 72, scale: 1.3 },
+        callout: { x: 72, y: 60, text: 'Cada regla con su estado y evidencia' },
+      },
+      {
+        duration: 2800,
+        cursor: { x: 62, y: 12 },
+        click: true,
+        zoom: { x: 62, y: 14, scale: 1.4 },
+        callout: { x: 38, y: 26, text: 'Reporte regulatorio listo para auditoría externa' },
+      },
+      {
+        duration: 2000,
+        callout: { x: 50, y: 50, text: 'Cumplimiento trazable, sin Excel paralelos' },
+      },
+    ],
   },
   {
     id: 'ai-audit',
@@ -176,6 +332,49 @@ const modules: (ModuleData & { icon: any })[] = [
       'Detecta inconsistencias y barreras sin evidencia',
       'Propone acciones justificadas con cita normativa',
       'Modo asistente: nunca ejecuta cambios, sólo recomienda',
+    ],
+    walkthrough: [
+      {
+        duration: 2400,
+        cursor: { x: 8, y: 14 },
+        callout: { x: 34, y: 26, text: 'Asistente IA que audita el diseño del pozo' },
+      },
+      {
+        duration: 3200,
+        cursor: { x: 32, y: 18 },
+        zoom: { x: 40, y: 20, scale: 1.4 },
+        callout: { x: 65, y: 30, text: 'Recomendaciones pendientes de revisión' },
+      },
+      {
+        duration: 3400,
+        cursor: { x: 40, y: 40 },
+        zoom: { x: 42, y: 40, scale: 1.4 },
+        callout: { x: 70, y: 28, text: 'Detecta componente fallado sin evidencia' },
+      },
+      {
+        duration: 3200,
+        cursor: { x: 30, y: 44 },
+        zoom: { x: 35, y: 44, scale: 1.4 },
+        callout: { x: 65, y: 56, text: 'Cada propuesta justificada con la norma aplicable' },
+      },
+      {
+        duration: 3200,
+        cursor: { x: 24, y: 47 },
+        click: true,
+        zoom: { x: 30, y: 47, scale: 1.4 },
+        callout: { x: 60, y: 36, text: 'El ingeniero decide: la IA sólo recomienda' },
+      },
+      {
+        duration: 2800,
+        cursor: { x: 92, y: 8 },
+        click: true,
+        zoom: { x: 80, y: 12, scale: 1.3 },
+        callout: { x: 45, y: 26, text: 'Re-analiza ante cualquier cambio del pozo' },
+      },
+      {
+        duration: 2000,
+        callout: { x: 50, y: 50, text: 'IA que asiste, nunca reemplaza el criterio' },
+      },
     ],
   },
 ];

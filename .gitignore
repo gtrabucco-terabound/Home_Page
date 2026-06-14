@@ -16,3 +16,7 @@ public/video/_raw/
 
 # persistent Playwright profile (contains session cookies, never commit)
 .playwright-profile/
+
+# Vorii local agent
+.claude/
+CLAUDE.md
