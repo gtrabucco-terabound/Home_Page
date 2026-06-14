@@ -6,6 +6,7 @@ import { Hero } from './components/Hero';
 import { BusinessLines } from './components/BusinessLines';
 import { UpstreamSection } from './components/UpstreamSection';
 import { Ecosystem } from './components/Ecosystem';
+import { AegisWell } from './components/AegisWell';
 import { SoftwareFactory } from './components/SoftwareFactory';
 import { Architecture } from './components/Architecture';
 import { Benefits } from './components/Benefits';
@@ -21,6 +22,7 @@ export default function App() {
           <Hero />
           <BusinessLines />
           <UpstreamSection />
+          <AegisWell />
           <Ecosystem />
           <SoftwareFactory />
           <Architecture />

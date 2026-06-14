@@ -11,6 +11,7 @@ export function Navbar() {
 
   const navLinks = [
     { name: 'Ecosistemas', href: '#ecosistema' },
+    { name: 'AegisWell', href: '#aegiswell' },
     { name: 'Upstream', href: '#upstream' },
     { name: 'Software Factory', href: '#factory' },
     { name: 'Arquitectura', href: '#arquitectura' },

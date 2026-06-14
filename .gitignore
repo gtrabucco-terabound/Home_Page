@@ -6,3 +6,13 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# local credentials
+.env.local
+
+# raw captures with real data — anonymize before publishing
+public/screenshots/_raw/
+public/video/_raw/
+
+# persistent Playwright profile (contains session cookies, never commit)
+.playwright-profile/
