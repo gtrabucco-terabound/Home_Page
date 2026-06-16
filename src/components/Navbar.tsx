@@ -1,8 +1,9 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useTheme } from '../lib/ThemeContext';
 import { Logo } from './Logo';
 import { Button } from './Button';
-import { Sun, Moon, Monitor, Menu, X } from 'lucide-react';
+import { Sun, Moon, Monitor, Menu, X, LogIn } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export function Navbar() {
@@ -15,6 +16,7 @@ export function Navbar() {
     { name: 'Upstream', href: '#upstream' },
     { name: 'Software Factory', href: '#factory' },
     { name: 'Arquitectura', href: '#arquitectura' },
+    { name: 'Contacto', href: '#contacto' },
   ];
 
   return (
@@ -64,6 +66,13 @@ export function Navbar() {
             </button>
           </div>
 
+          <Link
+            to="/login"
+            className="hidden md:flex items-center gap-1.5 text-sm font-medium text-[var(--muted)] hover:text-[var(--primary)] transition-colors"
+          >
+            <LogIn size={16} /> Acceder
+          </Link>
+
           <a href="#contacto" className="hidden md:flex">
             <Button variant="primary" size="sm">
               Solicitar Demo
@@ -102,6 +111,13 @@ export function Navbar() {
                   {link.name}
                 </a>
               ))}
+              <Link
+                to="/login"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2 text-lg font-medium text-[var(--foreground)] hover:text-[var(--primary)]"
+              >
+                <LogIn size={18} /> Acceder
+              </Link>
               <a href="#contacto" onClick={() => setIsOpen(false)} className="w-full">
                 <Button variant="primary" className="w-full">
                   Solicitar Demo

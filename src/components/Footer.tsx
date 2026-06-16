@@ -4,7 +4,7 @@ import { Github, Linkedin, Twitter, Mail, Phone, MapPin } from 'lucide-react';
 
 export function Footer() {
   return (
-    <footer id="contacto" className="bg-[var(--card)]/90 backdrop-blur-lg border-t border-[var(--border)] pt-20 pb-10">
+    <footer className="bg-[var(--card)]/90 backdrop-blur-lg border-t border-[var(--border)] pt-20 pb-10">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
           <div className="space-y-6">
