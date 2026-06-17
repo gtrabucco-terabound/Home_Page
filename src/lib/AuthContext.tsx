@@ -1,52 +1,64 @@
 import React from 'react';
 
-// Auth MOCK — sin backend real todavía (ver vorii-authority / client-data-policy).
-// Sólo simula sesión y rol en el cliente para validar las pantallas.
-
+// Auth real propia (JWT). El token se guarda en localStorage; el rol/empresa vienen de /api/auth/me.
 export type Rol = 'gerente' | 'desarrollador' | 'cliente';
 
 export interface Usuario {
   nombre: string;
   email: string;
   rol: Rol;
-  empresa?: string;
+  empresa?: string | null;
 }
 
 interface AuthContextValue {
   usuario: Usuario | null;
-  login: (rol: Rol) => void;
+  cargando: boolean;
+  login: (email: string, password: string) => Promise<Usuario>;
   logout: () => void;
 }
 
-const PERFILES: Record<Rol, Usuario> = {
-  gerente: { nombre: 'Germán A. Trabucco', email: 'german@terabound.com', rol: 'gerente' },
-  desarrollador: { nombre: 'Equipo Terabound', email: 'dev@terabound.com', rol: 'desarrollador' },
-  cliente: { nombre: 'A. Molina', email: 'amolina@cuencasur.example', rol: 'cliente', empresa: 'Cuenca Sur Petróleo' },
-};
-
+const TOKEN_KEY = 'terabound.token';
 const AuthContext = React.createContext<AuthContextValue | undefined>(undefined);
 
-const STORAGE_KEY = 'terabound.auth.rol';
+export function getToken(): string | null {
+  return typeof window === 'undefined' ? null : window.localStorage.getItem(TOKEN_KEY);
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [usuario, setUsuario] = React.useState<Usuario | null>(() => {
-    if (typeof window === 'undefined') return null;
-    const rol = window.localStorage.getItem(STORAGE_KEY) as Rol | null;
-    return rol && PERFILES[rol] ? PERFILES[rol] : null;
-  });
+  const [usuario, setUsuario] = React.useState<Usuario | null>(null);
+  const [cargando, setCargando] = React.useState(true);
 
-  const login = React.useCallback((rol: Rol) => {
-    setUsuario(PERFILES[rol]);
-    window.localStorage.setItem(STORAGE_KEY, rol);
+  // Al montar: si hay token, validar contra /api/auth/me.
+  React.useEffect(() => {
+    const token = getToken();
+    if (!token) { setCargando(false); return; }
+    fetch('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((d) => setUsuario(d.user))
+      .catch(() => { window.localStorage.removeItem(TOKEN_KEY); })
+      .finally(() => setCargando(false));
+  }, []);
+
+  const login = React.useCallback(async (email: string, password: string) => {
+    const r = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error ?? 'No se pudo iniciar sesión');
+    window.localStorage.setItem(TOKEN_KEY, d.token);
+    setUsuario(d.user);
+    return d.user as Usuario;
   }, []);
 
   const logout = React.useCallback(() => {
+    window.localStorage.removeItem(TOKEN_KEY);
     setUsuario(null);
-    window.localStorage.removeItem(STORAGE_KEY);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ usuario, login, logout }}>
+    <AuthContext.Provider value={{ usuario, cargando, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

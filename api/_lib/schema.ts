@@ -4,7 +4,7 @@ import {
 } from 'drizzle-orm/pg-core';
 
 /* ============ Enums ============ */
-export const rolEnum = pgEnum('rol', ['admin', 'empleado', 'cliente']);
+// rol se modela como texto (gerente | desarrollador | cliente) — evita migraciones de enum.
 export const estadoProspectoEnum = pgEnum('estado_prospecto', ['Lead', 'Consulta', 'Reunión', 'Propuesta']);
 export const estadoProyectoEnum = pgEnum('estado_proyecto', ['En curso', 'En riesgo', 'Pausado', 'Cerrado']);
 export const estadoHitoEnum = pgEnum('estado_hito', ['Pendiente', 'En progreso', 'Completado', 'Atrasado']);
@@ -46,15 +46,16 @@ export const clientes = pgTable('clientes', {
 export const profiles = pgTable('profiles', {
   id: uuid('id').primaryKey().defaultRandom(),
   tenantId: uuid('tenant_id').notNull().references(() => tenants.id),
-  userId: text('user_id').notNull(),
   nombre: text('nombre').notNull(),
   email: text('email').notNull(),
-  rol: rolEnum('rol').notNull().default('empleado'),
-  empresaId: uuid('empresa_id').references(() => clientes.id),
+  passwordHash: text('password_hash'),                 // scrypt (ver api/_lib/auth.ts)
+  rol: text('rol').notNull().default('desarrollador'), // gerente | desarrollador | cliente
+  empresaId: uuid('empresa_id').references(() => clientes.id), // sólo rol 'cliente'
+  activo: boolean('activo').notNull().default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
   deletedAt: timestamp('deleted_at', { withTimezone: true }),
-}, (t) => ({ userUniq: uniqueIndex('profiles_user_idx').on(t.userId) }));
+}, (t) => ({ emailUniq: uniqueIndex('profiles_email_idx').on(t.email) }));
 
 export const prospectos = pgTable('prospectos', {
   id: uuid('id').primaryKey().defaultRandom(),

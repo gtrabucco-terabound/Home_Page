@@ -14,7 +14,8 @@
     "capture:video": "tsx scripts/capture.ts -- --video",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/db-migrate.ts",
-    "db:seed": "tsx scripts/db-seed.ts"
+    "db:seed": "tsx scripts/db-seed.ts",
+    "db:auth": "tsx scripts/db-auth-setup.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

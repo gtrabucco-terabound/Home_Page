@@ -17,7 +17,10 @@ import { PortalDocumentos } from './pages/portal/PortalDocumentos';
 import { PortalSoporte } from './pages/portal/PortalSoporte';
 
 function RequireRol({ roles, children }: { roles: Rol[]; children: React.ReactNode }) {
-  const { usuario } = useAuth();
+  const { usuario, cargando } = useAuth();
+  if (cargando) {
+    return <div className="min-h-screen flex items-center justify-center text-[var(--muted)]">Cargando…</div>;
+  }
   if (!usuario) return <Navigate to="/login" replace />;
   if (!roles.includes(usuario.rol)) {
     // Redirige a cada quien a su espacio
