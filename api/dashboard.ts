@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { and, eq, isNull } from 'drizzle-orm';
-import { getDb, schema, resolveTenantId, requireDb } from './_db';
+import { getDb, schema, resolveTenantId, requireDb } from './_db.js';
 
 // Resumen para el dashboard del ERP (contadores + listados recientes).
 export default async function handler(_req: VercelRequest, res: VercelResponse) {

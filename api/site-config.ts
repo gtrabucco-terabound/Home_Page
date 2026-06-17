@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { eq } from 'drizzle-orm';
-import { getDb, schema, resolveTenantId, requireDb } from './_db';
+import { getDb, schema, resolveTenantId, requireDb } from './_db.js';
 
 // GET  /api/site-config       → config de contacto del tenant
 // PUT  /api/site-config       → actualiza (upsert) la config

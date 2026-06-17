@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getDb, schema, handleCrud, and, eq, isNull } from './_db';
+import { getDb, schema, handleCrud, and, eq, isNull } from './_db.js';
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
   return handleCrud(req, res, {

@@ -1,7 +1,7 @@
 // Helpers compartidos por las funciones /api (los archivos con guión bajo no son rutas).
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { and, eq, isNull } from 'drizzle-orm';
-import { getDb, schema } from './_lib/client';
+import { getDb, schema } from './_lib/client.js';
 
 export { getDb, schema };
 

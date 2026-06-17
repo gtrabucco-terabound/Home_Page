@@ -1,7 +1,7 @@
 // Cliente DB server-side (Vercel Functions). NUNCA importar desde código de cliente.
 import { drizzle } from 'drizzle-orm/neon-http';
 import { neon } from '@neondatabase/serverless';
-import * as schema from './schema';
+import * as schema from './schema.js';
 
 let _db: ReturnType<typeof drizzle<typeof schema>> | null = null;
 
