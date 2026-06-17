@@ -2,8 +2,17 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { and, eq, isNull } from 'drizzle-orm';
 import { getDb, schema } from './_lib/client.js';
+import { getSession, type TokenPayload } from './_lib/auth.js';
 
-export { getDb, schema };
+export { getDb, schema, getSession };
+export type { TokenPayload };
+
+// Exige sesión válida; si no, responde 401 y devuelve null.
+export function requireAuth(req: VercelRequest, res: VercelResponse): TokenPayload | null {
+  const s = getSession(req);
+  if (!s) { res.status(401).json({ error: 'No autenticado' }); return null; }
+  return s;
+}
 
 let cachedTenant: string | null = null;
 
@@ -34,20 +43,33 @@ async function writeAudit(tenantId: string, accion: 'INSERT' | 'UPDATE' | 'DELET
 interface CrudOptions {
   table: any;          // tabla drizzle (debe tener id, tenantId, updatedAt, deletedAt)
   entidad: string;
-  list: (tenantId: string) => Promise<unknown[]>;   // GET (con joins si hace falta)
-  pick: (body: any) => Record<string, unknown>;     // campos permitidos para alta/edición
+  roles?: string[];    // roles permitidos (si se define). Si falta → cualquier usuario autenticado.
+  writeRoles?: string[]; // roles que pueden POST/PUT/DELETE (si falta → igual que roles)
+  list: (session: TokenPayload) => Promise<unknown[]>;  // GET (con joins / scoping si hace falta)
+  pick: (body: any) => Record<string, unknown>;         // campos permitidos para alta/edición
 }
 
 // Despacha GET (lista) / POST (alta) / PUT (edición ?id=) / DELETE (baja lógica ?id=).
+// Exige token; el tenant SIEMPRE sale de la sesión (multitenant real).
 export async function handleCrud(req: VercelRequest, res: VercelResponse, opts: CrudOptions) {
   if (!requireDb(res)) return;
+  const session = requireAuth(req, res);
+  if (!session) return;
+  if (opts.roles && !opts.roles.includes(session.rol)) {
+    return res.status(403).json({ error: 'Sin permiso' });
+  }
+  const esEscritura = req.method !== 'GET';
+  const writeRoles = opts.writeRoles ?? opts.roles;
+  if (esEscritura && writeRoles && !writeRoles.includes(session.rol)) {
+    return res.status(403).json({ error: 'Sin permiso de escritura' });
+  }
   try {
-    const tenantId = await resolveTenantId();
+    const tenantId = session.tenantId;
     const db = getDb();
     const t = opts.table;
 
     if (req.method === 'GET') {
-      return res.status(200).json(await opts.list(tenantId));
+      return res.status(200).json(await opts.list(session));
     }
 
     if (req.method === 'POST') {

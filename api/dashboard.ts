@@ -1,12 +1,17 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { and, eq, isNull } from 'drizzle-orm';
-import { getDb, schema, resolveTenantId, requireDb } from './_db.js';
+import { getDb, schema, requireAuth, requireDb } from './_db.js';
 
-// Resumen para el dashboard del ERP (contadores + listados recientes).
-export default async function handler(_req: VercelRequest, res: VercelResponse) {
+// Resumen para el dashboard del ERP. Requiere sesión; el dinero solo para gerente.
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!requireDb(res)) return;
+  const session = requireAuth(req, res);
+  if (!session) return;
+  if (session.rol !== 'gerente' && session.rol !== 'desarrollador') {
+    return res.status(403).json({ error: 'Sin permiso' });
+  }
   try {
-    const tenantId = await resolveTenantId();
+    const tenantId = session.tenantId;
     const db = getDb();
     const tFilter = (col: any, del: any) => and(eq(col, tenantId), isNull(del));
 
@@ -22,12 +27,13 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
         .where(tFilter(schema.hitos.tenantId, schema.hitos.deletedAt)),
     ]);
 
+    const esGerente = session.rol === 'gerente';
     res.status(200).json({
-      pipeline: pros.reduce((s, p) => s + Number(p.valorEstimado ?? 0), 0),
+      pipeline: esGerente ? pros.reduce((s, p) => s + Number(p.valorEstimado ?? 0), 0) : null,
       prospectosCount: pros.length,
       clientesCount: clis.length,
       proyectosActivos: proy.filter((p) => p.estado === 'En curso' || p.estado === 'En riesgo').length,
-      gastoMes: gas.reduce((s, g) => s + Number(g.monto ?? 0), 0),
+      gastoMes: esGerente ? gas.reduce((s, g) => s + Number(g.monto ?? 0), 0) : null,
       proyectos: proy.slice(0, 5),
       hitos: hit.slice(0, 5),
     });

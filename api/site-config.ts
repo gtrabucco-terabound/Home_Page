@@ -1,22 +1,26 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { eq } from 'drizzle-orm';
-import { getDb, schema, resolveTenantId, requireDb } from './_db.js';
+import { getDb, schema, resolveTenantId, requireDb, getSession } from './_db.js';
 
-// GET  /api/site-config       → config de contacto del tenant
-// PUT  /api/site-config       → actualiza (upsert) la config
+// GET  /api/site-config  → PÚBLICO (la web lee el contacto). Tenant base.
+// PUT  /api/site-config  → solo gerente (desde el ERP).
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!requireDb(res)) return;
   try {
-    const tenantId = await resolveTenantId();
     const db = getDb();
 
     if (req.method === 'GET') {
+      const tenantId = await resolveTenantId();
       const [cfg] = await db.select().from(schema.siteConfig)
         .where(eq(schema.siteConfig.tenantId, tenantId)).limit(1);
       return res.status(200).json(cfg ?? null);
     }
 
     if (req.method === 'PUT') {
+      const session = getSession(req);
+      if (!session) return res.status(401).json({ error: 'No autenticado' });
+      if (session.rol !== 'gerente') return res.status(403).json({ error: 'Sin permiso' });
+      const tenantId = session.tenantId;
       const b = (req.body ?? {}) as Partial<typeof schema.siteConfig.$inferInsert>;
       const campos = {
         email: b.email, telefono: b.telefono, direccion: b.direccion,

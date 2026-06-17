@@ -5,16 +5,17 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
   return handleCrud(req, res, {
     table: schema.gastos,
     entidad: 'gastos',
+    roles: ['gerente'],
     pick: (b) => ({
       proyectoId: b.proyectoId || null, tipo: b.tipo, concepto: b.concepto,
       categoria: b.categoria, monto: b.monto != null ? String(b.monto) : '0', fecha: b.fecha,
     }),
-    list: async (tenantId) => getDb().select({
+    list: async (s) => getDb().select({
       id: schema.gastos.id, concepto: schema.gastos.concepto, categoria: schema.gastos.categoria,
       tipo: schema.gastos.tipo, monto: schema.gastos.monto, fecha: schema.gastos.fecha,
       proyectoId: schema.gastos.proyectoId, proyecto: schema.proyectos.nombre,
     }).from(schema.gastos)
       .leftJoin(schema.proyectos, eq(schema.gastos.proyectoId, schema.proyectos.id))
-      .where(and(eq(schema.gastos.tenantId, tenantId), isNull(schema.gastos.deletedAt))),
+      .where(and(eq(schema.gastos.tenantId, s.tenantId), isNull(schema.gastos.deletedAt))),
   });
 }
