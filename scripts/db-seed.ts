@@ -5,7 +5,7 @@ config({ path: '.env.local' });
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 import { eq } from 'drizzle-orm';
-import * as schema from '../src/db/schema';
+import * as schema from '../api/_lib/schema';
 import { clientes as mClientes, prospectos as mProspectos, proyectos as mProyectos, hitos as mHitos, gastos as mGastos, documentos as mDocs, tickets as mTickets } from '../src/lib/mockData';
 
 async function main() {

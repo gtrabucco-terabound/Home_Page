@@ -5,7 +5,7 @@ config({ path: '.env.local' });
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 import { sql } from 'drizzle-orm';
-import * as schema from '../src/db/schema';
+import * as schema from '../api/_lib/schema';
 
 async function main() {
   const db = drizzle(neon(process.env.DATABASE_URL!), { schema });
