@@ -46,8 +46,8 @@ export function ErpDashboard() {
                 <DataTable columns={['Proyecto', 'Cliente', 'Estado', 'Avance']}>
                   {data.proyectos.map((p) => (
                     <Row key={p.id}>
-                      <Cell className="font-medium">{p.nombre}</Cell>
-                      <Cell className="text-[var(--muted)]">{p.cliente ?? '—'}</Cell>
+                      <Cell className="font-medium whitespace-normal min-w-[160px]">{p.nombre}</Cell>
+                      <Cell className="text-[var(--muted)] whitespace-normal">{p.cliente ?? '—'}</Cell>
                       <Cell><Badge tone={estadoProyectoTone(p.estado)}>{p.estado}</Badge></Cell>
                       <Cell><Progress value={p.avance} /></Cell>
                     </Row>
