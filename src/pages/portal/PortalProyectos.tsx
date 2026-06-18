@@ -5,7 +5,13 @@ import { estadoProyectoTone, estadoHitoTone } from '../erp/tones';
 import type { EstadoProyecto, EstadoHito } from '../../lib/mockData';
 
 interface ProyectoRow { id: string; nombre: string; estado: EstadoProyecto; avance: number; responsable: string | null; inicio: string | null; fin: string | null; cliente: string | null }
-interface HitoRow { id: string; titulo: string; estado: EstadoHito; fecha: string | null; proyecto: string | null }
+interface HitoRow { id: string; titulo: string; estado: EstadoHito; fecha: string | null; orden: number; proyecto: string | null }
+
+const dotColor = (e: EstadoHito) =>
+  e === 'Completado' ? 'bg-emerald-500'
+    : e === 'En progreso' ? 'bg-blue-500'
+    : e === 'Atrasado' ? 'bg-red-500'
+    : 'bg-[var(--muted)]';
 
 export function PortalProyectos() {
   const { usuario } = useAuth();
@@ -17,7 +23,7 @@ export function PortalProyectos() {
 
   return (
     <div>
-      <PageHeader title="Mis Proyectos" subtitle="Avance y entregables de cada proyecto" />
+      <PageHeader title="Mis Proyectos" subtitle="Avance y línea de tiempo de cada proyecto" />
       <AsyncState loading={loading} error={error}>
         <div className="flex flex-col gap-6">
           {misProyectos.map((p) => {
@@ -32,25 +38,32 @@ export function PortalProyectos() {
                   <Badge tone={estadoProyectoTone(p.estado)}>{p.estado}</Badge>
                 </div>
                 <Progress value={p.avance} />
+
                 {sus.length > 0 && (
-                  <div className="mt-6 border-t border-[var(--border)] pt-5">
-                    <div className="text-xs uppercase tracking-widest text-[var(--muted)] mb-3">Hitos</div>
-                    <div className="flex flex-col gap-2">
+                  <div className="mt-6 border-t border-[var(--border)] pt-6">
+                    <div className="text-xs uppercase tracking-widest text-[var(--muted)] mb-5">Línea de tiempo</div>
+                    <ol className="relative border-l-2 border-[var(--border)] ml-1.5">
                       {sus.map((h) => (
-                        <div key={h.id} className="flex items-center justify-between gap-3 text-sm">
-                          <span>{h.titulo}</span>
-                          <span className="flex items-center gap-3">
-                            <span className="text-xs text-[var(--muted)]">{h.fecha}</span>
-                            <Badge tone={estadoHitoTone(h.estado)}>{h.estado}</Badge>
-                          </span>
-                        </div>
+                        <li key={h.id} className="relative ml-6 pb-6 last:pb-0">
+                          <span className={`absolute -left-[31px] top-0.5 w-3.5 h-3.5 rounded-full ring-4 ring-[var(--card)] ${dotColor(h.estado)}`} />
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                            <span className="font-medium text-sm">{h.titulo}</span>
+                            <span className="flex items-center gap-3 flex-shrink-0">
+                              <span className="text-xs text-[var(--muted)]">{h.fecha ?? '—'}</span>
+                              <Badge tone={estadoHitoTone(h.estado)}>{h.estado}</Badge>
+                            </span>
+                          </div>
+                        </li>
                       ))}
-                    </div>
+                    </ol>
                   </div>
                 )}
               </Panel>
             );
           })}
+          {misProyectos.length === 0 && (
+            <Panel className="p-8 text-center text-[var(--muted)]">Todavía no tenés proyectos asignados.</Panel>
+          )}
         </div>
       </AsyncState>
     </div>

@@ -27,14 +27,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .where(tFilter(schema.hitos.tenantId, schema.hitos.deletedAt)),
     ]);
 
+    // Avance ponderado por hitos
+    const hpeso = await db.select({ proyectoId: schema.hitos.proyectoId, peso: schema.hitos.peso, estado: schema.hitos.estado })
+      .from(schema.hitos).where(tFilter(schema.hitos.tenantId, schema.hitos.deletedAt));
+    const agg: Record<string, { tot: number; done: number }> = {};
+    for (const h of hpeso) {
+      const a = agg[h.proyectoId] ?? (agg[h.proyectoId] = { tot: 0, done: 0 });
+      a.tot += h.peso; if (h.estado === 'Completado') a.done += h.peso;
+    }
+    const proyectos = proy.map((p) => (agg[p.id]?.tot ? { ...p, avance: Math.round((agg[p.id].done / agg[p.id].tot) * 100) } : p));
+
     const esGerente = session.rol === 'gerente';
     res.status(200).json({
       pipeline: esGerente ? pros.reduce((s, p) => s + Number(p.valorEstimado ?? 0), 0) : null,
       prospectosCount: pros.length,
       clientesCount: clis.length,
-      proyectosActivos: proy.filter((p) => p.estado === 'En curso' || p.estado === 'En riesgo').length,
+      proyectosActivos: proyectos.filter((p) => p.estado === 'En curso' || p.estado === 'En riesgo').length,
       gastoMes: esGerente ? gas.reduce((s, g) => s + Number(g.monto ?? 0), 0) : null,
-      proyectos: proy.slice(0, 5),
+      proyectos: proyectos.slice(0, 5),
       hitos: hit.slice(0, 5),
     });
   } catch (e) { res.status(500).json({ error: (e as Error).message }); }

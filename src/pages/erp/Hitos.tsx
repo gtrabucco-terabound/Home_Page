@@ -11,6 +11,7 @@ import type { EstadoHito } from '../../lib/mockData';
 
 interface HitoRow {
   id: string; titulo: string; estado: EstadoHito; fecha: string | null;
+  orden: number; peso: number;
   proyectoId: string | null; proyecto: string | null;
 }
 interface ProyectoOpt { id: string; nombre: string }
@@ -30,6 +31,8 @@ export function Hitos() {
     { name: 'titulo', label: 'Título del hito', required: true, full: true },
     { name: 'estado', label: 'Estado', type: 'select', options: estados.map((e) => ({ value: e, label: e })) },
     { name: 'fecha', label: 'Fecha objetivo', type: 'date' },
+    { name: 'orden', label: 'Orden (secuencia)', type: 'number' },
+    { name: 'peso', label: 'Peso (ponderación del avance)', type: 'number' },
   ];
 
   const guardar = async (v: Record<string, any>) => {
@@ -51,12 +54,14 @@ export function Hitos() {
         action={<Button className="gap-2" onClick={() => { setEditing(null); setOpen(true); }}><Plus size={18} /> Nuevo hito</Button>}
       />
       <AsyncState loading={loading} error={error}>
-        <DataTable columns={['Hito', 'Proyecto', 'Estado', 'Fecha objetivo', '']}>
+        <DataTable columns={['#', 'Hito', 'Proyecto', 'Estado', 'Peso', 'Fecha objetivo', '']}>
           {hitos.map((h) => (
             <Row key={h.id}>
+              <Cell className="text-[var(--muted)]">{h.orden}</Cell>
               <Cell className="font-medium max-w-[260px] whitespace-normal">{h.titulo}</Cell>
               <Cell className="text-[var(--muted)]">{h.proyecto ?? '—'}</Cell>
               <Cell><Badge tone={estadoHitoTone(h.estado)}>{h.estado}</Badge></Cell>
+              <Cell className="text-[var(--muted)]">{h.peso}</Cell>
               <Cell className="text-[var(--muted)]">{h.fecha ?? '—'}</Cell>
               <Cell>
                 <div className="flex items-center gap-1 justify-end">
@@ -74,7 +79,7 @@ export function Hitos() {
       <FormModal
         title={editing ? 'Editar hito' : 'Nuevo hito'}
         fields={fields}
-        initial={editing ? { ...editing } : { estado: 'Pendiente' }}
+        initial={editing ? { ...editing } : { estado: 'Pendiente', orden: 0, peso: 1 }}
         open={open}
         onClose={() => setOpen(false)}
         onSubmit={guardar}

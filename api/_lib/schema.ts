@@ -93,6 +93,8 @@ export const hitos = pgTable('hitos', {
   titulo: text('titulo').notNull(),
   estado: estadoHitoEnum('estado').notNull().default('Pendiente'),
   fecha: date('fecha'),
+  orden: integer('orden').notNull().default(0),   // secuencia en la timeline
+  peso: integer('peso').notNull().default(1),     // ponderación del avance del proyecto
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
   deletedAt: timestamp('deleted_at', { withTimezone: true }),
