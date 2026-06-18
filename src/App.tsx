@@ -10,6 +10,7 @@ import { Clientes } from './pages/erp/Clientes';
 import { Proyectos } from './pages/erp/Proyectos';
 import { Hitos } from './pages/erp/Hitos';
 import { Gastos } from './pages/erp/Gastos';
+import { Solicitudes } from './pages/erp/Solicitudes';
 import { Configuracion } from './pages/erp/Configuracion';
 import { PortalDashboard } from './pages/portal/PortalDashboard';
 import { PortalProyectos } from './pages/portal/PortalProyectos';
@@ -49,6 +50,7 @@ export default function App() {
         <Route path="clientes" element={<RequireRol roles={['gerente']}><Clientes /></RequireRol>} />
         <Route path="proyectos" element={<Proyectos />} />
         <Route path="hitos" element={<Hitos />} />
+        <Route path="solicitudes" element={<Solicitudes />} />
         <Route path="gastos" element={<RequireRol roles={['gerente']}><Gastos /></RequireRol>} />
         <Route path="configuracion" element={<RequireRol roles={['gerente']}><Configuracion /></RequireRol>} />
       </Route>

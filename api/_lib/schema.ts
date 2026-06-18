@@ -312,3 +312,30 @@ export const auditLog = pgTable('audit_log', {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 });
 
+/* ============ Comunicación interna ============ */
+export const solicitudes = pgTable('solicitudes', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: uuid('tenant_id').notNull().references(() => tenants.id),
+  proyectoId: uuid('proyecto_id').references(() => proyectos.id),
+  autorId: uuid('autor_id').references(() => profiles.id),
+  autorNombre: text('autor_nombre'),
+  tipo: text('tipo').notNull().default('Consulta'),     // Consulta | Aprobación
+  titulo: text('titulo').notNull(),
+  detalle: text('detalle'),
+  estado: text('estado').notNull().default('Abierta'),  // Abierta | Aprobada | Rechazada | Resuelta
+  respuesta: text('respuesta'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
+});
+
+export const notificaciones = pgTable('notificaciones', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: uuid('tenant_id').notNull().references(() => tenants.id),
+  userId: uuid('user_id').notNull().references(() => profiles.id),
+  texto: text('texto').notNull(),
+  link: text('link'),
+  leida: boolean('leida').notNull().default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+});
+

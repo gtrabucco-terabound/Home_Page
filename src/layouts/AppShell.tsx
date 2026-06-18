@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Menu, X, Sun, Moon, Monitor, LogOut, Globe } from 'lucide-react';
 import { Logo } from '../components/Logo';
+import { NotificationBell } from '../components/admin/NotificationBell';
 import { useTheme } from '../lib/ThemeContext';
 import { useAuth } from '../lib/AuthContext';
 import { cn } from '../lib/utils';
@@ -124,6 +125,7 @@ export function AppShell({ title, items }: { title: string; items: NavItem[] }) 
           <div className="flex-1" />
 
           <div className="flex items-center gap-3">
+            <NotificationBell />
             <div className="flex items-center bg-[var(--card)] border border-[var(--border)] rounded-full p-1">
               <button onClick={() => setTheme('light')} aria-label="Tema claro" aria-pressed={theme === 'light'} className={cn('p-1.5 rounded-full transition-all', theme === 'light' ? 'bg-[var(--primary)] text-white' : 'text-[var(--muted)]')}><Sun size={14} /></button>
               <button onClick={() => setTheme('dark')} aria-label="Tema oscuro" aria-pressed={theme === 'dark'} className={cn('p-1.5 rounded-full transition-all', theme === 'dark' ? 'bg-[var(--primary)] text-white' : 'text-[var(--muted)]')}><Moon size={14} /></button>
