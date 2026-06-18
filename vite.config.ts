@@ -16,15 +16,25 @@ function localApiPlugin() {
         if (!req.url || !req.url.startsWith('/api/')) return next();
         const url = new URL(req.url, 'http://localhost');
         const name = url.pathname.replace(/^\/api\//, '').replace(/\/+$/, '');
+        const query: Record<string, string> = Object.fromEntries(url.searchParams);
         try {
-          const mod = await server.ssrLoadModule(`/api/${name}.ts`);
+          let mod: any;
+          try {
+            mod = await server.ssrLoadModule(`/api/${name}.ts`);
+          } catch (notFound) {
+            // Ruta dinámica: /api/<recurso> → api/[resource].ts
+            if (!name.includes('/')) {
+              query.resource = name;
+              mod = await server.ssrLoadModule('/api/[resource].ts');
+            } else { throw notFound; }
+          }
           const handler = mod.default;
           if (typeof handler !== 'function') {
             res.statusCode = 404;
             res.end(JSON.stringify({ error: `Ruta /api/${name} no encontrada` }));
             return;
           }
-          req.query = Object.fromEntries(url.searchParams);
+          req.query = query;
           if (req.method === 'POST' || req.method === 'PUT') {
             const chunks: Buffer[] = [];
             for await (const c of req) chunks.push(c as Buffer);
