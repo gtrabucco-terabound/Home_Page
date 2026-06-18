@@ -1,11 +1,13 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, Sun, Moon, Monitor, LogOut, Globe } from 'lucide-react';
+import { Menu, X, Sun, Moon, Monitor, LogOut, Globe, KeyRound } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { NotificationBell } from '../components/admin/NotificationBell';
+import { FormModal } from '../components/admin/FormModal';
 import { useTheme } from '../lib/ThemeContext';
 import { useAuth } from '../lib/AuthContext';
+import { apiSend } from '../lib/api';
 import { cn } from '../lib/utils';
 
 import type { Rol } from '../lib/AuthContext';
@@ -20,6 +22,7 @@ export interface NavItem {
 
 export function AppShell({ title, items }: { title: string; items: NavItem[] }) {
   const [open, setOpen] = React.useState(false);
+  const [pwOpen, setPwOpen] = React.useState(false);
   const { theme, setTheme } = useTheme();
   const { usuario, logout } = useAuth();
   const navigate = useNavigate();
@@ -27,6 +30,10 @@ export function AppShell({ title, items }: { title: string; items: NavItem[] }) 
   const salir = () => {
     logout();
     navigate('/');
+  };
+
+  const cambiarPassword = async (v: Record<string, any>) => {
+    await apiSend('usuarios?me=1', 'PUT', { password: v.password });
   };
 
   const visibles = items.filter((it) => !it.roles || (usuario && it.roles.includes(usuario.rol)));
@@ -69,6 +76,12 @@ export function AppShell({ title, items }: { title: string; items: NavItem[] }) 
         >
           <Globe size={18} /> Ver sitio público
         </Link>
+        <button
+          onClick={() => { setPwOpen(true); setOpen(false); }}
+          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--card)] transition-colors"
+        >
+          <KeyRound size={18} /> Cambiar contraseña
+        </button>
         <button
           onClick={salir}
           className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-[var(--muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors"
@@ -145,6 +158,15 @@ export function AppShell({ title, items }: { title: string; items: NavItem[] }) 
           <Outlet />
         </main>
       </div>
+
+      <FormModal
+        title="Cambiar contraseña"
+        fields={[{ name: 'password', label: 'Nueva contraseña (mín. 6)', type: 'password', required: true, full: true }]}
+        initial={{}}
+        open={pwOpen}
+        onClose={() => setPwOpen(false)}
+        onSubmit={cambiarPassword}
+      />
     </div>
   );
 }

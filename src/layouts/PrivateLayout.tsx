@@ -1,4 +1,4 @@
-import { LayoutDashboard, UserPlus, Building2, FolderKanban, Flag, Wallet, Settings, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, UserPlus, Building2, FolderKanban, Flag, Wallet, Settings, MessageSquare, Users } from 'lucide-react';
 import { AppShell, NavItem } from './AppShell';
 
 const items: NavItem[] = [
@@ -9,6 +9,7 @@ const items: NavItem[] = [
   { to: '/app/hitos', label: 'Hitos', icon: Flag },
   { to: '/app/solicitudes', label: 'Solicitudes', icon: MessageSquare },
   { to: '/app/gastos', label: 'Gastos', icon: Wallet, roles: ['gerente'] },
+  { to: '/app/usuarios', label: 'Usuarios', icon: Users, roles: ['gerente'] },
   { to: '/app/configuracion', label: 'Configuración', icon: Settings, roles: ['gerente'] },
 ];
 

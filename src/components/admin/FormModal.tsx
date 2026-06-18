@@ -6,7 +6,7 @@ import { Button } from '../Button';
 export interface Field {
   name: string;
   label: string;
-  type?: 'text' | 'number' | 'date' | 'email' | 'textarea' | 'select';
+  type?: 'text' | 'number' | 'date' | 'email' | 'password' | 'textarea' | 'select';
   options?: { value: string; label: string }[];
   required?: boolean;
   placeholder?: string;
