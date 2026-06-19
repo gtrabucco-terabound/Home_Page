@@ -416,3 +416,13 @@ Infra: **Vercel Blob** para archivos; en la BD se guarda solo la URL.
 - Relación persona↔proyecto para el filtrado "solo asignado" del desarrollador.
 - Enforcement de permisos server-side (hoy gating de UI/rutas).
 - Alinear el enum `profiles.rol` a `gerente`/`desarrollador`/`cliente`.
+
+## B-Finanzas — Aprobación de gastos + rol financiero (diseñado, a construir con el financiero)
+> Decidido: se diseña ahora, se construye junto con Finanzas (alinear reglas contables).
+
+- **Rol nuevo `financiero`**: aprueba gastos (y a futuro, lo de plata: contratos, facturación, flujo de caja). Distinto del `gerente` general. Sumar a la lista de roles (`gerente` | `financiero` | `desarrollador` | `cliente`).
+- **`gastos`**: agregar `estado` (`Pendiente` | `Aprobado` | `Rechazado`), `aprobado_por` (uuid → profiles), `aprobado_el`, `motivo_rechazo`.
+- **Flujo**: integrante registra → `Pendiente` → el `financiero` aprueba/rechaza (con motivo). Gastos cargados por `financiero`/`gerente` pueden nacer `Aprobado`.
+- **Regla**: **solo los `Aprobado` suman** en totales, dashboard y flujo de caja. Pendientes/rechazados no computan.
+- **Notificaciones** (infra ya existente): al registrar → avisa al `financiero`; al resolver → avisa al autor.
+- Mismo patrón que la **aprobación de horas (TimeSheet)** del módulo Finanzas — conviene construirlos juntos.
