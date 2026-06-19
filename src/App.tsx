@@ -52,7 +52,7 @@ export default function App() {
         <Route path="proyectos" element={<Proyectos />} />
         <Route path="hitos" element={<Hitos />} />
         <Route path="solicitudes" element={<Solicitudes />} />
-        <Route path="gastos" element={<RequireRol roles={['gerente']}><Gastos /></RequireRol>} />
+        <Route path="gastos" element={<RequireRol roles={['gerente', 'desarrollador']}><Gastos /></RequireRol>} />
         <Route path="usuarios" element={<RequireRol roles={['gerente']}><Usuarios /></RequireRol>} />
         <Route path="configuracion" element={<RequireRol roles={['gerente']}><Configuracion /></RequireRol>} />
       </Route>

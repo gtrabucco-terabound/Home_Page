@@ -28,7 +28,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const token = signToken({ sub: p.id, email: p.email, rol: p.rol, tenantId: p.tenantId, empresaId: p.empresaId });
-    return res.status(200).json({ token, user: { nombre: p.nombre, email: p.email, rol: p.rol, empresa } });
+    return res.status(200).json({ token, user: { id: p.id, nombre: p.nombre, email: p.email, rol: p.rol, empresa } });
   } catch (e) {
     return res.status(500).json({ error: (e as Error).message });
   }

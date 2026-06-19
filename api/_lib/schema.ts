@@ -130,6 +130,7 @@ export const gastos = pgTable('gastos', {
   id: uuid('id').primaryKey().defaultRandom(),
   tenantId: uuid('tenant_id').notNull().references(() => tenants.id),
   proyectoId: uuid('proyecto_id').references(() => proyectos.id),
+  personaId: uuid('persona_id').references(() => profiles.id),  // atribución: null = Empresa, set = integrante
   tipo: tipoGastoEnum('tipo').notNull().default('Indirecto'),
   concepto: text('concepto').notNull(),
   categoria: categoriaGastoEnum('categoria').notNull().default('Otros'),

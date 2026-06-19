@@ -4,6 +4,7 @@ import React from 'react';
 export type Rol = 'gerente' | 'desarrollador' | 'cliente';
 
 export interface Usuario {
+  id: string;
   nombre: string;
   email: string;
   rol: Rol;

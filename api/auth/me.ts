@@ -20,7 +20,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .where(eq(schema.clientes.id, p.empresaId)).limit(1);
       empresa = c?.empresa ?? null;
     }
-    return res.status(200).json({ user: { nombre: p.nombre, email: p.email, rol: p.rol, empresa } });
+    return res.status(200).json({ user: { id: p.id, nombre: p.nombre, email: p.email, rol: p.rol, empresa } });
   } catch (e) {
     return res.status(500).json({ error: (e as Error).message });
   }

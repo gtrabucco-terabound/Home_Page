@@ -8,7 +8,7 @@ const items: NavItem[] = [
   { to: '/app/proyectos', label: 'Proyectos', icon: FolderKanban },
   { to: '/app/hitos', label: 'Hitos', icon: Flag },
   { to: '/app/solicitudes', label: 'Solicitudes', icon: MessageSquare },
-  { to: '/app/gastos', label: 'Gastos', icon: Wallet, roles: ['gerente'] },
+  { to: '/app/gastos', label: 'Gastos', icon: Wallet },
   { to: '/app/usuarios', label: 'Usuarios', icon: Users, roles: ['gerente'] },
   { to: '/app/configuracion', label: 'Configuración', icon: Settings, roles: ['gerente'] },
 ];

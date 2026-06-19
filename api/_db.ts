@@ -47,6 +47,7 @@ interface CrudOptions {
   writeRoles?: string[]; // roles que pueden POST/PUT/DELETE (si falta → igual que roles)
   list: (session: TokenPayload) => Promise<unknown[]>;  // GET (con joins / scoping si hace falta)
   pick: (body: any) => Record<string, unknown>;         // campos permitidos para alta/edición
+  injectOnWrite?: (session: TokenPayload) => Record<string, unknown>; // fuerza campos según sesión
 }
 
 // Despacha GET (lista) / POST (alta) / PUT (edición ?id=) / DELETE (baja lógica ?id=).
@@ -72,8 +73,10 @@ export async function handleCrud(req: VercelRequest, res: VercelResponse, opts: 
       return res.status(200).json(await opts.list(session));
     }
 
+    const inject = opts.injectOnWrite ? opts.injectOnWrite(session) : {};
+
     if (req.method === 'POST') {
-      const ins = (await db.insert(t).values({ ...opts.pick(req.body ?? {}), tenantId }).returning()) as any[];
+      const ins = (await db.insert(t).values({ ...opts.pick(req.body ?? {}), ...inject, tenantId }).returning()) as any[];
       const row = ins[0];
       await writeAudit(tenantId, 'INSERT', opts.entidad, row.id, row);
       return res.status(201).json(row);

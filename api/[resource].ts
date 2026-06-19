@@ -35,13 +35,22 @@ const configs: Record<string, any> = {
     list: async (s: any) => getDb().select().from(schema.prospectos).where(and(eq(schema.prospectos.tenantId, s.tenantId), isNull(schema.prospectos.deletedAt))),
   },
   gastos: {
-    table: schema.gastos, entidad: 'gastos', roles: ['gerente'],
-    pick: (b: any) => ({ proyectoId: b.proyectoId || null, tipo: b.tipo, concepto: b.concepto, categoria: b.categoria, monto: b.monto != null ? String(b.monto) : '0', fecha: b.fecha }),
-    list: async (s: any) => getDb().select({
-      id: schema.gastos.id, concepto: schema.gastos.concepto, categoria: schema.gastos.categoria, tipo: schema.gastos.tipo,
-      monto: schema.gastos.monto, fecha: schema.gastos.fecha, proyectoId: schema.gastos.proyectoId, proyecto: schema.proyectos.nombre,
-    }).from(schema.gastos).leftJoin(schema.proyectos, eq(schema.gastos.proyectoId, schema.proyectos.id))
-      .where(and(eq(schema.gastos.tenantId, s.tenantId), isNull(schema.gastos.deletedAt))),
+    table: schema.gastos, entidad: 'gastos', roles: ['gerente', 'desarrollador'], writeRoles: ['gerente', 'desarrollador'],
+    pick: (b: any) => ({ proyectoId: b.proyectoId || null, personaId: b.personaId || null, tipo: b.tipo, concepto: b.concepto, categoria: b.categoria, monto: b.monto != null ? String(b.monto) : '0', fecha: b.fecha }),
+    // El desarrollador solo puede atribuirse gastos a sí mismo.
+    injectOnWrite: (s: any) => (s.rol === 'desarrollador' ? { personaId: s.sub } : {}),
+    list: async (s: any) => {
+      const conds = [eq(schema.gastos.tenantId, s.tenantId), isNull(schema.gastos.deletedAt)];
+      if (s.rol === 'desarrollador') conds.push(eq(schema.gastos.personaId, s.sub)); // el dev solo ve los suyos
+      return getDb().select({
+        id: schema.gastos.id, concepto: schema.gastos.concepto, categoria: schema.gastos.categoria, tipo: schema.gastos.tipo,
+        monto: schema.gastos.monto, fecha: schema.gastos.fecha, proyectoId: schema.gastos.proyectoId, proyecto: schema.proyectos.nombre,
+        personaId: schema.gastos.personaId, persona: schema.profiles.nombre,
+      }).from(schema.gastos)
+        .leftJoin(schema.proyectos, eq(schema.gastos.proyectoId, schema.proyectos.id))
+        .leftJoin(schema.profiles, eq(schema.gastos.personaId, schema.profiles.id))
+        .where(and(...conds));
+    },
   },
   proyectos: {
     table: schema.proyectos, entidad: 'proyectos', roles: ['gerente', 'desarrollador', 'cliente'], writeRoles: ['gerente'],
