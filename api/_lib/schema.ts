@@ -135,7 +135,10 @@ export const gastos = pgTable('gastos', {
   concepto: text('concepto').notNull(),
   proveedor: text('proveedor'),  // empresa/proveedor del servicio (ej. Railway, AWS). Luego autocompletable por IA.
   categoria: categoriaGastoEnum('categoria').notNull().default('Otros'),
-  monto: numeric('monto', { precision: 12, scale: 2 }).notNull().default('0'),
+  monto: numeric('monto', { precision: 12, scale: 2 }).notNull().default('0'),  // CANÓNICO en USD
+  moneda: text('moneda').notNull().default('USD'),        // moneda de carga (USD | ARS)
+  montoOriginal: numeric('monto_original', { precision: 14, scale: 2 }),  // monto en la moneda de carga
+  tco: numeric('tco', { precision: 14, scale: 4 }),        // tipo de cambio aplicado (ARS por USD); 1 si USD
   fecha: date('fecha'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),

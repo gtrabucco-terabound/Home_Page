@@ -15,6 +15,8 @@ export interface Field {
   derive?: (value: string, values: Record<string, any>) => Record<string, any>;
   // Oculta el campo según el estado actual del formulario (ej. "Nuevo concepto" solo si eligió "Otro").
   hidden?: (values: Record<string, any>) => boolean;
+  // Texto de ayuda dinámico debajo del campo (ej. conversión ARS→USD en vivo).
+  hint?: (values: Record<string, any>) => string | null;
 }
 
 interface Props {
@@ -99,6 +101,9 @@ export function FormModal({ title, fields, initial, open, onClose, onSubmit }: P
                   ) : (
                     <input id={f.name} type={f.type ?? 'text'} required={f.required} placeholder={f.placeholder}
                       value={values[f.name] ?? ''} onChange={(e) => set(f.name, e.target.value, f.derive)} className={inputCls} />
+                  )}
+                  {f.hint && f.hint(values) && (
+                    <p className="mt-1.5 text-xs text-[var(--muted)]">{f.hint(values)}</p>
                   )}
                 </div>
               ))}

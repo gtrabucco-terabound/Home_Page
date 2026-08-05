@@ -11,9 +11,11 @@ import type { CategoriaGasto } from '../../lib/mockData';
 
 interface GastoRow {
   id: string; concepto: string; proveedor: string | null; categoria: CategoriaGasto; tipo: 'Directo' | 'Indirecto';
-  monto: string | null; fecha: string | null; proyecto: string | null;
+  monto: string | null; moneda: string | null; montoOriginal: string | null; tco: string | null;
+  fecha: string | null; proyecto: string | null;
   proyectoId: string | null; personaId: string | null; persona: string | null;
 }
+interface FxRate { rate: number; venta: number; fecha: string | null }
 interface ProyectoOpt { id: string; nombre: string }
 interface UsuarioOpt { id: string; nombre: string; rol?: string }
 interface ConceptoOpt { id: string; nombre: string; categoria: CategoriaGasto }
@@ -30,6 +32,7 @@ export function Gastos() {
   // Solo equipo Terabound (excluye clientes) para atribución y filtro.
   const usuarios = esGerente ? (usuariosRaw ?? []).filter((u) => u.rol !== 'cliente') : [];
   const { data: conceptosCat, reload: reloadConceptos } = useApi<ConceptoOpt[]>('conceptos');
+  const { data: fx } = useApi<FxRate>('fx'); // dólar oficial del día (para cargar gastos en ARS)
   const catalogo = conceptosCat ?? [];
   const catPorNombre: Record<string, CategoriaGasto> = Object.fromEntries(catalogo.map((c) => [c.nombre, c.categoria]));
   const gastos = data ?? [];
@@ -61,7 +64,12 @@ export function Gastos() {
       ...(usuarios ?? []).map((u) => ({ value: u.id, label: u.id === usuario?.id ? `Yo — ${u.nombre}` : u.nombre })),
       { value: 'empresa', label: 'Empresa (general)' },
     ] }] : []),
-    { name: 'monto', label: 'Monto (USD)', type: 'number', required: true },
+    { name: 'moneda', label: 'Moneda', type: 'select', options: [{ value: 'USD', label: 'USD (dólares)' }, { value: 'ARS', label: 'ARS (pesos)' }] },
+    { name: 'monto', label: 'Monto', type: 'number', required: true,
+      hint: (v) => v.moneda !== 'ARS' ? null
+        : fx?.rate
+          ? `≈ US$ ${(Number(v.monto || 0) / fx.rate).toLocaleString('es-AR', { maximumFractionDigits: 2 })} · oficial $${fx.rate} (venta)`
+          : 'Obteniendo cotización oficial…' },
     { name: 'fecha', label: 'Fecha', type: 'date' },
   ];
 
@@ -77,6 +85,21 @@ export function Gastos() {
       }
     }
     delete payload.conceptoNuevo;
+    // Moneda: guardamos siempre USD como canónico (monto). Si es ARS, convertimos con el oficial del día.
+    const monedaSel = v.moneda || 'USD';
+    const ingresado = Number(v.monto ?? 0);
+    if (monedaSel === 'ARS') {
+      if (!fx?.rate) throw new Error('No se pudo obtener la cotización oficial. Reintentá en unos segundos.');
+      payload.moneda = 'ARS';
+      payload.montoOriginal = ingresado;
+      payload.tco = fx.rate;
+      payload.monto = Number((ingresado / fx.rate).toFixed(2)); // USD canónico
+    } else {
+      payload.moneda = 'USD';
+      payload.montoOriginal = ingresado;
+      payload.tco = 1;
+      payload.monto = ingresado;
+    }
     if (esGerente) { payload.personaId = (!v.atribucion || v.atribucion === 'empresa') ? null : v.atribucion; delete payload.atribucion; }
     if (editing) await apiSend(`gastos?id=${editing.id}`, 'PUT', payload);
     else await apiSend('gastos', 'POST', payload);
@@ -124,7 +147,10 @@ export function Gastos() {
               <Cell>{g.persona ? <span className="text-[var(--foreground)]">{g.persona}</span> : <span className="text-[var(--muted)]">Empresa</span>}</Cell>
               <Cell className="text-[var(--muted)]">{g.proyecto ?? '—'}</Cell>
               <Cell className="text-[var(--muted)]">{g.fecha ?? '—'}</Cell>
-              <Cell className="font-medium">{moneda(Number(g.monto ?? 0))}</Cell>
+              <Cell className="font-medium">
+                {moneda(Number(g.monto ?? 0))}
+                {g.moneda === 'ARS' && g.montoOriginal ? <span className="block text-xs text-[var(--muted)] font-normal">ARS {Number(g.montoOriginal).toLocaleString('es-AR')}</span> : null}
+              </Cell>
               <Cell>
                 <div className="flex items-center gap-1 justify-end">
                   <button onClick={() => { setEditing(g); setOpen(true); }} aria-label="Editar" className="p-2 rounded-lg hover:bg-[var(--card)] text-[var(--muted)] hover:text-[var(--primary)]"><Pencil size={15} /></button>
@@ -141,9 +167,11 @@ export function Gastos() {
         fields={fields}
         initial={editing
           ? { ...editing, atribucion: editing.personaId ?? 'empresa',
+              moneda: editing.moneda ?? 'USD',
+              monto: editing.moneda === 'ARS' && editing.montoOriginal != null ? editing.montoOriginal : editing.monto,
               concepto: catPorNombre[editing.concepto] ? editing.concepto : OTRO,
               conceptoNuevo: catPorNombre[editing.concepto] ? '' : editing.concepto }
-          : { categoria: 'Otros', tipo: 'Indirecto', atribucion: usuario?.id ?? 'empresa', concepto: '', conceptoNuevo: '' }}
+          : { categoria: 'Otros', tipo: 'Indirecto', atribucion: usuario?.id ?? 'empresa', moneda: 'USD', concepto: '', conceptoNuevo: '' }}
         open={open}
         onClose={() => setOpen(false)}
         onSubmit={guardar}
