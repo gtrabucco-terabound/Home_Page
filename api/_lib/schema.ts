@@ -133,6 +133,7 @@ export const gastos = pgTable('gastos', {
   personaId: uuid('persona_id').references(() => profiles.id),  // atribución: null = Empresa, set = integrante
   tipo: tipoGastoEnum('tipo').notNull().default('Indirecto'),
   concepto: text('concepto').notNull(),
+  proveedor: text('proveedor'),  // empresa/proveedor del servicio (ej. Railway, AWS). Luego autocompletable por IA.
   categoria: categoriaGastoEnum('categoria').notNull().default('Otros'),
   monto: numeric('monto', { precision: 12, scale: 2 }).notNull().default('0'),
   fecha: date('fecha'),

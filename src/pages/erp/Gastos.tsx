@@ -10,7 +10,7 @@ import { useAuth } from '../../lib/AuthContext';
 import type { CategoriaGasto } from '../../lib/mockData';
 
 interface GastoRow {
-  id: string; concepto: string; categoria: CategoriaGasto; tipo: 'Directo' | 'Indirecto';
+  id: string; concepto: string; proveedor: string | null; categoria: CategoriaGasto; tipo: 'Directo' | 'Indirecto';
   monto: string | null; fecha: string | null; proyecto: string | null;
   proyectoId: string | null; personaId: string | null; persona: string | null;
 }
@@ -51,6 +51,7 @@ export function Gastos() {
       derive: (v) => (v !== OTRO && catPorNombre[v] ? { categoria: catPorNombre[v] } : {}) },
     { name: 'conceptoNuevo', label: 'Nuevo concepto', required: true, full: true, placeholder: 'Ej: Suscripción Figma',
       hidden: (vals) => vals.concepto !== OTRO },
+    { name: 'proveedor', label: 'Proveedor', full: true, placeholder: 'Ej: Railway Corporation' },
     { name: 'categoria', label: 'Categoría', type: 'select', options: categorias.map((c) => ({ value: c, label: c })) },
     { name: 'tipo', label: 'Tipo', type: 'select', options: [{ value: 'Indirecto', label: 'Indirecto' }, { value: 'Directo', label: 'Directo' }] },
     { name: 'proyectoId', label: 'Proyecto (opcional)', type: 'select', options: (proyectos ?? []).map((p) => ({ value: p.id, label: p.nombre })) },
@@ -108,10 +109,11 @@ export function Gastos() {
         <StatCard label="Movimientos" value={loading ? '…' : String(visibles.length)} />
       </div>
       <AsyncState loading={loading} error={error}>
-        <DataTable columns={['Concepto', 'Categoría', 'Tipo', 'Atribuido a', 'Proyecto', 'Fecha', 'Monto', '']}>
+        <DataTable columns={['Concepto', 'Proveedor', 'Categoría', 'Tipo', 'Atribuido a', 'Proyecto', 'Fecha', 'Monto', '']}>
           {visibles.map((g) => (
             <Row key={g.id}>
               <Cell className="font-medium">{g.concepto}</Cell>
+              <Cell className="text-[var(--muted)]">{g.proveedor ?? '—'}</Cell>
               <Cell><Badge tone="info">{g.categoria}</Badge></Cell>
               <Cell className="text-[var(--muted)]">{g.tipo}</Cell>
               <Cell>{g.persona ? <span className="text-[var(--foreground)]">{g.persona}</span> : <span className="text-[var(--muted)]">Empresa</span>}</Cell>

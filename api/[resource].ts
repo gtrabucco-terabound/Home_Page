@@ -36,14 +36,14 @@ const configs: Record<string, any> = {
   },
   gastos: {
     table: schema.gastos, entidad: 'gastos', roles: ['gerente', 'desarrollador'], writeRoles: ['gerente', 'desarrollador'],
-    pick: (b: any) => ({ proyectoId: b.proyectoId || null, personaId: b.personaId || null, tipo: b.tipo, concepto: b.concepto, categoria: b.categoria, monto: b.monto != null ? String(b.monto) : '0', fecha: b.fecha }),
+    pick: (b: any) => ({ proyectoId: b.proyectoId || null, personaId: b.personaId || null, tipo: b.tipo, concepto: b.concepto, proveedor: b.proveedor || null, categoria: b.categoria, monto: b.monto != null ? String(b.monto) : '0', fecha: b.fecha }),
     // El desarrollador solo puede atribuirse gastos a sí mismo.
     injectOnWrite: (s: any) => (s.rol === 'desarrollador' ? { personaId: s.sub } : {}),
     list: async (s: any) => {
       const conds = [eq(schema.gastos.tenantId, s.tenantId), isNull(schema.gastos.deletedAt)];
       if (s.rol === 'desarrollador') conds.push(eq(schema.gastos.personaId, s.sub)); // el dev solo ve los suyos
       return getDb().select({
-        id: schema.gastos.id, concepto: schema.gastos.concepto, categoria: schema.gastos.categoria, tipo: schema.gastos.tipo,
+        id: schema.gastos.id, concepto: schema.gastos.concepto, proveedor: schema.gastos.proveedor, categoria: schema.gastos.categoria, tipo: schema.gastos.tipo,
         monto: schema.gastos.monto, fecha: schema.gastos.fecha, proyectoId: schema.gastos.proyectoId, proyecto: schema.proyectos.nombre,
         personaId: schema.gastos.personaId, persona: schema.profiles.nombre,
       }).from(schema.gastos)

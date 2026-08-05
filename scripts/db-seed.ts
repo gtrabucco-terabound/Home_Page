@@ -75,9 +75,9 @@ async function main() {
 
   // Catálogo base de conceptos de gasto (cada uno atado a su categoría)
   const conceptosBase: [string, 'Infraestructura' | 'Licencias' | 'Personal' | 'Servicios' | 'Otros'][] = [
-    ['Servidores / Hosting (Vercel)', 'Infraestructura'], ['Base de datos (Supabase)', 'Infraestructura'],
+    ['Servidores / Hosting', 'Infraestructura'], ['Base de datos', 'Infraestructura'],
     ['Dominios / DNS', 'Infraestructura'], ['Almacenamiento / CDN', 'Infraestructura'],
-    ['Software SaaS (suscripciones)', 'Licencias'], ['IA / APIs (Claude, OpenAI)', 'Licencias'],
+    ['Software SaaS', 'Licencias'], ['IA / APIs', 'Licencias'],
     ['Herramientas de diseño', 'Licencias'], ['Repositorios / CI-CD', 'Licencias'],
     ['Sueldos', 'Personal'], ['Honorarios / Freelance', 'Personal'], ['Cargas sociales', 'Personal'], ['Capacitación', 'Personal'],
     ['Contador / Legal', 'Servicios'], ['Comisiones bancarias', 'Servicios'], ['Marketing / Publicidad', 'Servicios'],
