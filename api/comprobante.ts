@@ -4,6 +4,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getDb, schema, getSession, and, eq } from './_db.js';
 
+// La lectura con IA (descarga + visión) puede pasar los 10s por defecto de Vercel.
+export const maxDuration = 60;
+
 const BUCKET = 'comprobantes';
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://oezmycxouzlqdczcpqyd.supabase.co';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
