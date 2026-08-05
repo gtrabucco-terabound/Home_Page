@@ -45,6 +45,7 @@ const configs: Record<string, any> = {
       return getDb().select({
         id: schema.gastos.id, concepto: schema.gastos.concepto, proveedor: schema.gastos.proveedor, categoria: schema.gastos.categoria, tipo: schema.gastos.tipo,
         monto: schema.gastos.monto, moneda: schema.gastos.moneda, montoOriginal: schema.gastos.montoOriginal, tco: schema.gastos.tco,
+        comprobantePath: schema.gastos.comprobantePath,
         fecha: schema.gastos.fecha, proyectoId: schema.gastos.proyectoId, proyecto: schema.proyectos.nombre,
         personaId: schema.gastos.personaId, persona: schema.profiles.nombre,
       }).from(schema.gastos)

@@ -1,17 +1,18 @@
 import React from 'react';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Paperclip, Loader2 } from 'lucide-react';
 import { PageHeader, StatCard, DataTable, Row, Cell, Badge, AsyncState } from '../../components/admin/ui';
 import { Button } from '../../components/Button';
 import { FormModal, Field } from '../../components/admin/FormModal';
 import { moneda } from '../../lib/mockData';
 import { useApi } from '../../lib/useApi';
-import { apiSend } from '../../lib/api';
+import { apiSend, apiGet } from '../../lib/api';
 import { useAuth } from '../../lib/AuthContext';
 import type { CategoriaGasto } from '../../lib/mockData';
 
 interface GastoRow {
   id: string; concepto: string; proveedor: string | null; categoria: CategoriaGasto; tipo: 'Directo' | 'Indirecto';
   monto: string | null; moneda: string | null; montoOriginal: string | null; tco: string | null;
+  comprobantePath: string | null;
   fecha: string | null; proyecto: string | null;
   proyectoId: string | null; personaId: string | null; persona: string | null;
 }
@@ -111,6 +112,37 @@ export function Gastos() {
     reload();
   };
 
+  // Comprobante: subida directa a Storage con URL firmada.
+  const fileRef = React.useRef<HTMLInputElement>(null);
+  const [targetGasto, setTargetGasto] = React.useState<string | null>(null);
+  const [subiendoId, setSubiendoId] = React.useState<string | null>(null);
+
+  const pedirArchivo = (gastoId: string) => { setTargetGasto(gastoId); fileRef.current?.click(); };
+
+  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    const gId = targetGasto;
+    if (!file || !gId) return;
+    setSubiendoId(gId);
+    try {
+      const { path, uploadUrl } = await apiSend<{ path: string; uploadUrl: string }>(`comprobante?id=${gId}&action=sign-upload`, 'POST', { filename: file.name, type: file.type });
+      const up = await fetch(uploadUrl, { method: 'PUT', headers: { 'content-type': file.type || 'application/octet-stream', 'x-upsert': 'true' }, body: file });
+      if (!up.ok) throw new Error(`Falló la subida (${up.status})`);
+      await apiSend(`comprobante?id=${gId}&action=confirm`, 'POST', { path });
+      reload();
+    } catch (err) {
+      alert('Error al subir el comprobante: ' + (err as Error).message);
+    } finally {
+      setSubiendoId(null); setTargetGasto(null);
+    }
+  };
+
+  const verComprobante = async (gId: string) => {
+    try { const { url } = await apiGet<{ url: string }>(`comprobante?id=${gId}`); window.open(url, '_blank', 'noopener'); }
+    catch (err) { alert('Error al abrir el comprobante: ' + (err as Error).message); }
+  };
+
   return (
     <div>
       <PageHeader
@@ -153,6 +185,13 @@ export function Gastos() {
               </Cell>
               <Cell>
                 <div className="flex items-center gap-1 justify-end">
+                  {subiendoId === g.id ? (
+                    <span className="p-2 text-[var(--muted)]"><Loader2 size={15} className="animate-spin" /></span>
+                  ) : g.comprobantePath ? (
+                    <button onClick={() => verComprobante(g.id)} aria-label="Ver comprobante" title="Ver comprobante" className="p-2 rounded-lg hover:bg-emerald-500/10 text-emerald-500"><Paperclip size={15} /></button>
+                  ) : (
+                    <button onClick={() => pedirArchivo(g.id)} aria-label="Adjuntar comprobante" title="Adjuntar comprobante" className="p-2 rounded-lg hover:bg-[var(--card)] text-[var(--muted)] hover:text-[var(--primary)]"><Paperclip size={15} /></button>
+                  )}
                   <button onClick={() => { setEditing(g); setOpen(true); }} aria-label="Editar" className="p-2 rounded-lg hover:bg-[var(--card)] text-[var(--muted)] hover:text-[var(--primary)]"><Pencil size={15} /></button>
                   <button onClick={() => borrar(g)} aria-label="Eliminar" className="p-2 rounded-lg hover:bg-red-500/10 text-[var(--muted)] hover:text-red-500"><Trash2 size={15} /></button>
                 </div>
@@ -161,6 +200,8 @@ export function Gastos() {
           ))}
         </DataTable>
       </AsyncState>
+
+      <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,application/pdf" className="hidden" onChange={onFile} />
 
       <FormModal
         title={editing ? 'Editar gasto' : 'Registrar gasto'}
