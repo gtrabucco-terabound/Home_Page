@@ -140,6 +140,7 @@ export const gastos = pgTable('gastos', {
   montoOriginal: numeric('monto_original', { precision: 14, scale: 2 }),  // monto en la moneda de carga
   tco: numeric('tco', { precision: 14, scale: 4 }),        // tipo de cambio aplicado (ARS por USD); 1 si USD
   comprobantePath: text('comprobante_path'),               // objeto en Storage (bucket privado 'comprobantes')
+  proveedorCuit: text('proveedor_cuit'),                    // CUIT del proveedor (extraíble por IA del comprobante)
   fecha: date('fecha'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),

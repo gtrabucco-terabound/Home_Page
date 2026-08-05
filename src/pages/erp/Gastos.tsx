@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Pencil, Trash2, Paperclip, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Paperclip, Loader2, Sparkles } from 'lucide-react';
 import { PageHeader, StatCard, DataTable, Row, Cell, Badge, AsyncState } from '../../components/admin/ui';
 import { Button } from '../../components/Button';
 import { FormModal, Field } from '../../components/admin/FormModal';
@@ -12,7 +12,7 @@ import type { CategoriaGasto } from '../../lib/mockData';
 interface GastoRow {
   id: string; concepto: string; proveedor: string | null; categoria: CategoriaGasto; tipo: 'Directo' | 'Indirecto';
   monto: string | null; moneda: string | null; montoOriginal: string | null; tco: string | null;
-  comprobantePath: string | null;
+  comprobantePath: string | null; proveedorCuit: string | null;
   fecha: string | null; proyecto: string | null;
   proyectoId: string | null; personaId: string | null; persona: string | null;
 }
@@ -58,6 +58,7 @@ export function Gastos() {
     { name: 'conceptoNuevo', label: 'Nuevo concepto', required: true, full: true, placeholder: 'Ej: Suscripción Figma',
       hidden: (vals) => vals.concepto !== OTRO },
     { name: 'proveedor', label: 'Proveedor', full: true, placeholder: 'Ej: Railway Corporation' },
+    { name: 'proveedorCuit', label: 'CUIT proveedor', placeholder: 'Ej: 30-12345678-9' },
     { name: 'categoria', label: 'Categoría', type: 'select', options: categorias.map((c) => ({ value: c, label: c })) },
     { name: 'tipo', label: 'Tipo', type: 'select', options: [{ value: 'Indirecto', label: 'Indirecto' }, { value: 'Directo', label: 'Directo' }] },
     { name: 'proyectoId', label: 'Proyecto (opcional)', type: 'select', options: (proyectos ?? []).map((p) => ({ value: p.id, label: p.nombre })) },
@@ -143,6 +144,31 @@ export function Gastos() {
     catch (err) { alert('Error al abrir el comprobante: ' + (err as Error).message); }
   };
 
+  // IA: lee el comprobante y abre el formulario precargado para validar.
+  const [leyendoId, setLeyendoId] = React.useState<string | null>(null);
+  const leerIA = async (g: GastoRow) => {
+    setLeyendoId(g.id);
+    try {
+      const { datos } = await apiSend<{ datos: any }>(`comprobante?id=${g.id}&action=ocr`, 'POST', {});
+      const monedaIA = (String(datos.moneda ?? '').toUpperCase() === 'ARS') ? 'ARS' : 'USD';
+      setEditing({
+        ...g,
+        proveedor: datos.proveedor ?? g.proveedor,
+        proveedorCuit: datos.cuit ?? g.proveedorCuit,
+        moneda: monedaIA,
+        montoOriginal: datos.monto != null ? String(datos.monto) : g.montoOriginal,
+        // el concepto extraído va como "Otro" para que lo valides o ajustes
+        concepto: datos.concepto ?? g.concepto,
+        fecha: datos.fecha ?? g.fecha,
+      } as GastoRow);
+      setOpen(true);
+    } catch (err) {
+      alert('No se pudo leer el comprobante con IA: ' + (err as Error).message);
+    } finally {
+      setLeyendoId(null);
+    }
+  };
+
   return (
     <div>
       <PageHeader
@@ -185,6 +211,11 @@ export function Gastos() {
               </Cell>
               <Cell>
                 <div className="flex items-center gap-1 justify-end">
+                  {g.comprobantePath && (
+                    leyendoId === g.id
+                      ? <span className="p-2 text-[var(--muted)]"><Loader2 size={15} className="animate-spin" /></span>
+                      : <button onClick={() => leerIA(g)} aria-label="Leer con IA" title="Leer factura con IA" className="p-2 rounded-lg hover:bg-violet-500/10 text-violet-500"><Sparkles size={15} /></button>
+                  )}
                   {subiendoId === g.id ? (
                     <span className="p-2 text-[var(--muted)]"><Loader2 size={15} className="animate-spin" /></span>
                   ) : g.comprobantePath ? (
@@ -209,7 +240,7 @@ export function Gastos() {
         initial={editing
           ? { ...editing, atribucion: editing.personaId ?? 'empresa',
               moneda: editing.moneda ?? 'USD',
-              monto: editing.moneda === 'ARS' && editing.montoOriginal != null ? editing.montoOriginal : editing.monto,
+              monto: editing.montoOriginal != null ? editing.montoOriginal : editing.monto,
               concepto: catPorNombre[editing.concepto] ? editing.concepto : OTRO,
               conceptoNuevo: catPorNombre[editing.concepto] ? '' : editing.concepto }
           : { categoria: 'Otros', tipo: 'Indirecto', atribucion: usuario?.id ?? 'empresa', moneda: 'USD', concepto: '', conceptoNuevo: '' }}
