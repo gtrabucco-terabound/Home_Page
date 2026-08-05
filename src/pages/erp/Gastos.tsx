@@ -15,7 +15,7 @@ interface GastoRow {
   proyectoId: string | null; personaId: string | null; persona: string | null;
 }
 interface ProyectoOpt { id: string; nombre: string }
-interface UsuarioOpt { id: string; nombre: string }
+interface UsuarioOpt { id: string; nombre: string; rol?: string }
 interface ConceptoOpt { id: string; nombre: string; categoria: CategoriaGasto }
 
 const categorias: CategoriaGasto[] = ['Infraestructura', 'Licencias', 'Personal', 'Servicios', 'Otros'];
@@ -26,7 +26,9 @@ export function Gastos() {
   const esGerente = usuario?.rol === 'gerente';
   const { data, loading, error, reload } = useApi<GastoRow[]>('gastos');
   const { data: proyectos } = useApi<ProyectoOpt[]>('proyectos');
-  const { data: usuarios } = useApi<UsuarioOpt[]>(esGerente ? 'usuarios' : 'proyectos'); // dev no consulta usuarios
+  const { data: usuariosRaw } = useApi<UsuarioOpt[]>(esGerente ? 'usuarios' : 'proyectos'); // dev no consulta usuarios
+  // Solo equipo Terabound (excluye clientes) para atribución y filtro.
+  const usuarios = esGerente ? (usuariosRaw ?? []).filter((u) => u.rol !== 'cliente') : [];
   const { data: conceptosCat, reload: reloadConceptos } = useApi<ConceptoOpt[]>('conceptos');
   const catalogo = conceptosCat ?? [];
   const catPorNombre: Record<string, CategoriaGasto> = Object.fromEntries(catalogo.map((c) => [c.nombre, c.categoria]));
@@ -55,7 +57,10 @@ export function Gastos() {
     { name: 'categoria', label: 'Categoría', type: 'select', options: categorias.map((c) => ({ value: c, label: c })) },
     { name: 'tipo', label: 'Tipo', type: 'select', options: [{ value: 'Indirecto', label: 'Indirecto' }, { value: 'Directo', label: 'Directo' }] },
     { name: 'proyectoId', label: 'Proyecto (opcional)', type: 'select', options: (proyectos ?? []).map((p) => ({ value: p.id, label: p.nombre })) },
-    ...(esGerente ? [{ name: 'atribucion', label: 'Atribución', type: 'select' as const, options: [{ value: 'empresa', label: 'Empresa (general)' }, ...(usuarios ?? []).map((u) => ({ value: u.id, label: u.nombre }))] }] : []),
+    ...(esGerente ? [{ name: 'atribucion', label: 'Atribución', type: 'select' as const, options: [
+      ...(usuarios ?? []).map((u) => ({ value: u.id, label: u.id === usuario?.id ? `Yo — ${u.nombre}` : u.nombre })),
+      { value: 'empresa', label: 'Empresa (general)' },
+    ] }] : []),
     { name: 'monto', label: 'Monto (USD)', type: 'number', required: true },
     { name: 'fecha', label: 'Fecha', type: 'date' },
   ];
@@ -138,7 +143,7 @@ export function Gastos() {
           ? { ...editing, atribucion: editing.personaId ?? 'empresa',
               concepto: catPorNombre[editing.concepto] ? editing.concepto : OTRO,
               conceptoNuevo: catPorNombre[editing.concepto] ? '' : editing.concepto }
-          : { categoria: 'Otros', tipo: 'Indirecto', atribucion: 'empresa', concepto: '', conceptoNuevo: '' }}
+          : { categoria: 'Otros', tipo: 'Indirecto', atribucion: usuario?.id ?? 'empresa', concepto: '', conceptoNuevo: '' }}
         open={open}
         onClose={() => setOpen(false)}
         onSubmit={guardar}

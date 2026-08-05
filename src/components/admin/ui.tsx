@@ -94,7 +94,7 @@ export function DataTable({ columns, children }: { columns: string[]; children: 
           <thead>
             <tr className="border-b border-[var(--border)] text-left">
               {columns.map((c) => (
-                <th key={c} className="px-5 py-3.5 text-xs uppercase tracking-widest text-[var(--muted)] font-semibold whitespace-nowrap">
+                <th key={c} className="px-4 py-3.5 text-xs uppercase tracking-widest text-[var(--muted)] font-semibold whitespace-nowrap">
                   {c}
                 </th>
               ))}
@@ -112,7 +112,7 @@ export function Row({ children }: { children: React.ReactNode }) {
 }
 
 export function Cell({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <td className={cn('px-5 py-4 align-middle whitespace-nowrap', className)}>{children}</td>;
+  return <td className={cn('px-4 py-4 align-middle', className)}>{children}</td>;
 }
 
 // Estado de carga/error para pantallas conectadas a la API
