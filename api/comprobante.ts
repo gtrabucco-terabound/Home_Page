@@ -67,19 +67,19 @@ async function gastoDelTenant(id: string, tenantId: string) {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const session = getSession(req);
-  if (!session) return res.status(401).json({ error: 'No autenticado' });
-  if (!SERVICE_KEY) return res.status(503).json({ error: 'Falta SUPABASE_SERVICE_ROLE_KEY en el entorno.' });
-
-  const id = String(req.query.id ?? '');
-  if (!id) return res.status(400).json({ error: 'Falta id de gasto' });
-  const gasto = await gastoDelTenant(id, session.tenantId);
-  if (!gasto) return res.status(404).json({ error: 'Gasto no encontrado' });
-  // El desarrollador solo opera sobre sus propios gastos (scoping ya aplicado en gastos).
-
-  const storageHeaders = { Authorization: `Bearer ${SERVICE_KEY}`, 'Content-Type': 'application/json' };
-
   try {
+    const session = getSession(req);
+    if (!session) return res.status(401).json({ error: 'No autenticado' });
+    if (!SERVICE_KEY) return res.status(503).json({ error: 'Falta SUPABASE_SERVICE_ROLE_KEY en el entorno.' });
+
+    const id = String(req.query.id ?? '');
+    if (!id) return res.status(400).json({ error: 'Falta id de gasto' });
+    const gasto = await gastoDelTenant(id, session.tenantId);
+    if (!gasto) return res.status(404).json({ error: 'Gasto no encontrado' });
+    // El desarrollador solo opera sobre sus propios gastos (scoping ya aplicado en gastos).
+
+    const storageHeaders = { Authorization: `Bearer ${SERVICE_KEY}`, 'Content-Type': 'application/json' };
+
     // Ver / descargar: URL firmada temporal.
     if (req.method === 'GET') {
       if (!gasto.comprobantePath) return res.status(404).json({ error: 'El gasto no tiene comprobante' });
