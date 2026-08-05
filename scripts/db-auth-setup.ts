@@ -2,13 +2,13 @@
 import { config } from 'dotenv';
 config({ path: '.env.local' });
 
-import { neon } from '@neondatabase/serverless';
+import postgres from 'postgres';
 import { hashPassword } from '../api/_lib/auth';
 
 const DEMO_PW = 'Terabound.2026'; // contraseña demo — cambiar luego
 
 async function main() {
-  const sql = neon(process.env.DATABASE_URL!);
+  const sql = postgres(process.env.DATABASE_URL!, { prepare: false });
 
   // profiles está vacía: la recreamos con la forma nueva (password_hash, rol text, unique email).
   await sql`DROP TABLE IF EXISTS profiles CASCADE`;
@@ -53,4 +53,4 @@ async function main() {
   usuarios.forEach((u) => console.log('   -', u[1], '→', u[2]));
 }
 
-main().catch((e) => { console.error('✗', e.message); process.exit(1); });
+main().then(() => process.exit(0)).catch((e) => { console.error('✗', e.message); process.exit(1); });

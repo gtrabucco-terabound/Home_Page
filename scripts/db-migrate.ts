@@ -2,20 +2,20 @@
 import { config } from 'dotenv';
 config({ path: '.env.local' });
 
-import { neon } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-http';
-import { migrate } from 'drizzle-orm/neon-http/migrator';
+import postgres from 'postgres';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import { migrate } from 'drizzle-orm/postgres-js/migrator';
 
 async function main() {
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error('DATABASE_URL no está en .env.local');
-  const db = drizzle(neon(url));
+  const db = drizzle(postgres(url, { prepare: false }));
   console.log('Aplicando migraciones…');
   await migrate(db, { migrationsFolder: './drizzle' });
   console.log('✓ Migración aplicada correctamente.');
 }
 
-main().catch((e) => {
+main().then(() => process.exit(0)).catch((e) => {
   console.error('✗ Error en la migración:', e);
   process.exit(1);
 });

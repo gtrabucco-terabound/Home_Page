@@ -8,7 +8,6 @@ CREATE TYPE "public"."estado_prospecto" AS ENUM('Lead', 'Consulta', 'Reunión', 
 CREATE TYPE "public"."estado_proyecto" AS ENUM('En curso', 'En riesgo', 'Pausado', 'Cerrado');--> statement-breakpoint
 CREATE TYPE "public"."estado_ticket" AS ENUM('Abierto', 'En proceso', 'Resuelto');--> statement-breakpoint
 CREATE TYPE "public"."prioridad" AS ENUM('Alta', 'Media', 'Baja');--> statement-breakpoint
-CREATE TYPE "public"."rol" AS ENUM('admin', 'empleado', 'cliente');--> statement-breakpoint
 CREATE TYPE "public"."tipo_gasto" AS ENUM('Directo', 'Indirecto');--> statement-breakpoint
 CREATE TYPE "public"."tipo_item" AS ENUM('Único', 'PorHora', 'Mensual', 'Tramo', 'Hito', 'RevenueShare', 'CostoCliente');--> statement-breakpoint
 CREATE TYPE "public"."tipo_movimiento" AS ENUM('Ingreso', 'Egreso');--> statement-breakpoint
@@ -100,6 +99,7 @@ CREATE TABLE "gastos" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"tenant_id" uuid NOT NULL,
 	"proyecto_id" uuid,
+	"persona_id" uuid,
 	"tipo" "tipo_gasto" DEFAULT 'Indirecto' NOT NULL,
 	"concepto" text NOT NULL,
 	"categoria" "categoria_gasto" DEFAULT 'Otros' NOT NULL,
@@ -117,6 +117,8 @@ CREATE TABLE "hitos" (
 	"titulo" text NOT NULL,
 	"estado" "estado_hito" DEFAULT 'Pendiente' NOT NULL,
 	"fecha" date,
+	"orden" integer DEFAULT 0 NOT NULL,
+	"peso" integer DEFAULT 1 NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now(),
 	"updated_at" timestamp with time zone DEFAULT now(),
 	"deleted_at" timestamp with time zone
@@ -132,6 +134,16 @@ CREATE TABLE "movimientos_caja" (
 	"factura_id" uuid,
 	"gasto_id" uuid,
 	"proyecto_id" uuid,
+	"created_at" timestamp with time zone DEFAULT now()
+);
+--> statement-breakpoint
+CREATE TABLE "notificaciones" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"tenant_id" uuid NOT NULL,
+	"user_id" uuid NOT NULL,
+	"texto" text NOT NULL,
+	"link" text,
+	"leida" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now()
 );
 --> statement-breakpoint
@@ -203,11 +215,12 @@ CREATE TABLE "presupuestos" (
 CREATE TABLE "profiles" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"tenant_id" uuid NOT NULL,
-	"user_id" text NOT NULL,
 	"nombre" text NOT NULL,
 	"email" text NOT NULL,
-	"rol" "rol" DEFAULT 'empleado' NOT NULL,
+	"password_hash" text,
+	"rol" text DEFAULT 'desarrollador' NOT NULL,
 	"empresa_id" uuid,
+	"activo" boolean DEFAULT true NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now(),
 	"updated_at" timestamp with time zone DEFAULT now(),
 	"deleted_at" timestamp with time zone
@@ -264,6 +277,22 @@ CREATE TABLE "site_config" (
 	"updated_at" timestamp with time zone DEFAULT now()
 );
 --> statement-breakpoint
+CREATE TABLE "solicitudes" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"tenant_id" uuid NOT NULL,
+	"proyecto_id" uuid,
+	"autor_id" uuid,
+	"autor_nombre" text,
+	"tipo" text DEFAULT 'Consulta' NOT NULL,
+	"titulo" text NOT NULL,
+	"detalle" text,
+	"estado" text DEFAULT 'Abierta' NOT NULL,
+	"respuesta" text,
+	"created_at" timestamp with time zone DEFAULT now(),
+	"updated_at" timestamp with time zone DEFAULT now(),
+	"deleted_at" timestamp with time zone
+);
+--> statement-breakpoint
 CREATE TABLE "tenants" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"nombre" text NOT NULL,
@@ -312,12 +341,15 @@ ALTER TABLE "facturas" ADD CONSTRAINT "facturas_contrato_id_contratos_id_fk" FOR
 ALTER TABLE "facturas" ADD CONSTRAINT "facturas_cliente_id_clientes_id_fk" FOREIGN KEY ("cliente_id") REFERENCES "public"."clientes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "gastos" ADD CONSTRAINT "gastos_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "gastos" ADD CONSTRAINT "gastos_proyecto_id_proyectos_id_fk" FOREIGN KEY ("proyecto_id") REFERENCES "public"."proyectos"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "gastos" ADD CONSTRAINT "gastos_persona_id_profiles_id_fk" FOREIGN KEY ("persona_id") REFERENCES "public"."profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "hitos" ADD CONSTRAINT "hitos_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "hitos" ADD CONSTRAINT "hitos_proyecto_id_proyectos_id_fk" FOREIGN KEY ("proyecto_id") REFERENCES "public"."proyectos"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "movimientos_caja" ADD CONSTRAINT "movimientos_caja_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "movimientos_caja" ADD CONSTRAINT "movimientos_caja_factura_id_facturas_id_fk" FOREIGN KEY ("factura_id") REFERENCES "public"."facturas"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "movimientos_caja" ADD CONSTRAINT "movimientos_caja_gasto_id_gastos_id_fk" FOREIGN KEY ("gasto_id") REFERENCES "public"."gastos"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "movimientos_caja" ADD CONSTRAINT "movimientos_caja_proyecto_id_proyectos_id_fk" FOREIGN KEY ("proyecto_id") REFERENCES "public"."proyectos"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "notificaciones" ADD CONSTRAINT "notificaciones_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "notificaciones" ADD CONSTRAINT "notificaciones_user_id_profiles_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "personas" ADD CONSTRAINT "personas_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "presupuesto_items" ADD CONSTRAINT "presupuesto_items_presupuesto_id_presupuestos_id_fk" FOREIGN KEY ("presupuesto_id") REFERENCES "public"."presupuestos"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "presupuesto_items" ADD CONSTRAINT "presupuesto_items_seccion_id_presupuesto_secciones_id_fk" FOREIGN KEY ("seccion_id") REFERENCES "public"."presupuesto_secciones"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -333,11 +365,14 @@ ALTER TABLE "proyecto_costeo" ADD CONSTRAINT "proyecto_costeo_proyecto_id_proyec
 ALTER TABLE "proyectos" ADD CONSTRAINT "proyectos_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "proyectos" ADD CONSTRAINT "proyectos_cliente_id_clientes_id_fk" FOREIGN KEY ("cliente_id") REFERENCES "public"."clientes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "site_config" ADD CONSTRAINT "site_config_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "solicitudes" ADD CONSTRAINT "solicitudes_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "solicitudes" ADD CONSTRAINT "solicitudes_proyecto_id_proyectos_id_fk" FOREIGN KEY ("proyecto_id") REFERENCES "public"."proyectos"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "solicitudes" ADD CONSTRAINT "solicitudes_autor_id_profiles_id_fk" FOREIGN KEY ("autor_id") REFERENCES "public"."profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "tickets" ADD CONSTRAINT "tickets_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "tickets" ADD CONSTRAINT "tickets_proyecto_id_proyectos_id_fk" FOREIGN KEY ("proyecto_id") REFERENCES "public"."proyectos"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "timesheets" ADD CONSTRAINT "timesheets_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "timesheets" ADD CONSTRAINT "timesheets_persona_id_personas_id_fk" FOREIGN KEY ("persona_id") REFERENCES "public"."personas"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "timesheets" ADD CONSTRAINT "timesheets_proyecto_id_proyectos_id_fk" FOREIGN KEY ("proyecto_id") REFERENCES "public"."proyectos"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-CREATE UNIQUE INDEX "profiles_user_idx" ON "profiles" USING btree ("user_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "profiles_email_idx" ON "profiles" USING btree ("email");--> statement-breakpoint
 CREATE UNIQUE INDEX "costeo_proyecto_idx" ON "proyecto_costeo" USING btree ("proyecto_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "site_config_tenant_idx" ON "site_config" USING btree ("tenant_id");

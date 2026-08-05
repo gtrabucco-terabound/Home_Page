@@ -2,8 +2,8 @@
 import { config } from 'dotenv';
 config({ path: '.env.local' });
 
-import { neon } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-http';
+import postgres from 'postgres';
+import { drizzle } from 'drizzle-orm/postgres-js';
 import { eq } from 'drizzle-orm';
 import * as schema from '../api/_lib/schema';
 import { clientes as mClientes, prospectos as mProspectos, proyectos as mProyectos, hitos as mHitos, gastos as mGastos, documentos as mDocs, tickets as mTickets } from '../src/lib/mockData';
@@ -11,7 +11,7 @@ import { clientes as mClientes, prospectos as mProspectos, proyectos as mProyect
 async function main() {
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error('DATABASE_URL no está en .env.local');
-  const db = drizzle(neon(url), { schema });
+  const db = drizzle(postgres(url, { prepare: false }), { schema });
 
   const existing = await db.select().from(schema.tenants).where(eq(schema.tenants.slug, 'terabound')).limit(1);
   if (existing.length) {
@@ -83,7 +83,7 @@ async function main() {
   console.log('✓ Seed completado.');
 }
 
-main().catch((e) => {
+main().then(() => process.exit(0)).catch((e) => {
   console.error('✗ Error en el seed:', e);
   process.exit(1);
 });
