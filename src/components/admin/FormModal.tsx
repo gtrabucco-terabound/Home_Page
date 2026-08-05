@@ -11,6 +11,10 @@ export interface Field {
   required?: boolean;
   placeholder?: string;
   full?: boolean;
+  // Al cambiar este campo, devuelve parches para autocompletar otros campos (ej. concepto → categoría).
+  derive?: (value: string, values: Record<string, any>) => Record<string, any>;
+  // Oculta el campo según el estado actual del formulario (ej. "Nuevo concepto" solo si eligió "Otro").
+  hidden?: (values: Record<string, any>) => boolean;
 }
 
 interface Props {
@@ -34,7 +38,8 @@ export function FormModal({ title, fields, initial, open, onClose, onSubmit }: P
     if (open) { setValues(initial ?? {}); setError(null); }
   }, [open, initial]);
 
-  const set = (n: string, v: any) => setValues((s) => ({ ...s, [n]: v }));
+  const set = (n: string, v: any, derive?: Field['derive']) =>
+    setValues((s) => ({ ...s, [n]: v, ...(derive ? derive(v, { ...s, [n]: v }) : {}) }));
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,24 +81,24 @@ export function FormModal({ title, fields, initial, open, onClose, onSubmit }: P
             </div>
 
             <form onSubmit={submit} className="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
-              {fields.map((f) => (
+              {fields.filter((f) => !(f.hidden && f.hidden(values))).map((f) => (
                 <div key={f.name} className={f.full ? 'col-span-2' : ''}>
                   <label htmlFor={f.name} className="block text-sm font-medium mb-1.5">
                     {f.label}{f.required && <span className="text-red-500"> *</span>}
                   </label>
                   {f.type === 'textarea' ? (
                     <textarea id={f.name} rows={3} required={f.required} placeholder={f.placeholder}
-                      value={values[f.name] ?? ''} onChange={(e) => set(f.name, e.target.value)}
+                      value={values[f.name] ?? ''} onChange={(e) => set(f.name, e.target.value, f.derive)}
                       className={`${inputCls} resize-none`} />
                   ) : f.type === 'select' ? (
                     <select id={f.name} required={f.required}
-                      value={values[f.name] ?? ''} onChange={(e) => set(f.name, e.target.value)} className={inputCls}>
+                      value={values[f.name] ?? ''} onChange={(e) => set(f.name, e.target.value, f.derive)} className={inputCls}>
                       <option value="">Seleccionar…</option>
                       {f.options?.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                     </select>
                   ) : (
                     <input id={f.name} type={f.type ?? 'text'} required={f.required} placeholder={f.placeholder}
-                      value={values[f.name] ?? ''} onChange={(e) => set(f.name, e.target.value)} className={inputCls} />
+                      value={values[f.name] ?? ''} onChange={(e) => set(f.name, e.target.value, f.derive)} className={inputCls} />
                   )}
                 </div>
               ))}

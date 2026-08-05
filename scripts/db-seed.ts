@@ -73,6 +73,19 @@ async function main() {
     tenantId, proyectoId: proyByNombre[t.proyecto], asunto: t.asunto, estado: t.estado, prioridad: t.prioridad, fecha: t.fecha,
   })));
 
+  // Catálogo base de conceptos de gasto (cada uno atado a su categoría)
+  const conceptosBase: [string, 'Infraestructura' | 'Licencias' | 'Personal' | 'Servicios' | 'Otros'][] = [
+    ['Servidores / Hosting (Vercel)', 'Infraestructura'], ['Base de datos (Supabase)', 'Infraestructura'],
+    ['Dominios / DNS', 'Infraestructura'], ['Almacenamiento / CDN', 'Infraestructura'],
+    ['Software SaaS (suscripciones)', 'Licencias'], ['IA / APIs (Claude, OpenAI)', 'Licencias'],
+    ['Herramientas de diseño', 'Licencias'], ['Repositorios / CI-CD', 'Licencias'],
+    ['Sueldos', 'Personal'], ['Honorarios / Freelance', 'Personal'], ['Cargas sociales', 'Personal'], ['Capacitación', 'Personal'],
+    ['Contador / Legal', 'Servicios'], ['Comisiones bancarias', 'Servicios'], ['Marketing / Publicidad', 'Servicios'],
+    ['Internet / Telefonía', 'Servicios'], ['Viáticos / Movilidad', 'Servicios'],
+    ['Impuestos', 'Otros'], ['Varios', 'Otros'],
+  ];
+  await db.insert(schema.conceptoGasto).values(conceptosBase.map(([nombre, categoria]) => ({ tenantId, nombre, categoria })));
+
   // Personas de ejemplo (con sueldo → base para costo/hora promedio)
   await db.insert(schema.personas).values([
     { tenantId, nombre: 'Dev Senior', rol: 'Desarrollo', sueldoMensual: '4000', horasMensuales: 160 },

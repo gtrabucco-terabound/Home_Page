@@ -16,8 +16,10 @@ interface GastoRow {
 }
 interface ProyectoOpt { id: string; nombre: string }
 interface UsuarioOpt { id: string; nombre: string }
+interface ConceptoOpt { id: string; nombre: string; categoria: CategoriaGasto }
 
 const categorias: CategoriaGasto[] = ['Infraestructura', 'Licencias', 'Personal', 'Servicios', 'Otros'];
+const OTRO = '__otro__'; // opción del desplegable para cargar un concepto fuera del catálogo
 
 export function Gastos() {
   const { usuario } = useAuth();
@@ -25,6 +27,9 @@ export function Gastos() {
   const { data, loading, error, reload } = useApi<GastoRow[]>('gastos');
   const { data: proyectos } = useApi<ProyectoOpt[]>('proyectos');
   const { data: usuarios } = useApi<UsuarioOpt[]>(esGerente ? 'usuarios' : 'proyectos'); // dev no consulta usuarios
+  const { data: conceptosCat, reload: reloadConceptos } = useApi<ConceptoOpt[]>('conceptos');
+  const catalogo = conceptosCat ?? [];
+  const catPorNombre: Record<string, CategoriaGasto> = Object.fromEntries(catalogo.map((c) => [c.nombre, c.categoria]));
   const gastos = data ?? [];
   const [open, setOpen] = React.useState(false);
   const [editing, setEditing] = React.useState<GastoRow | null>(null);
@@ -40,7 +45,12 @@ export function Gastos() {
   const total = visibles.reduce((s, g) => s + Number(g.monto ?? 0), 0);
 
   const fields: Field[] = [
-    { name: 'concepto', label: 'Concepto', required: true, full: true },
+    { name: 'concepto', label: 'Concepto', required: true, full: true, type: 'select',
+      options: [...catalogo.map((c) => ({ value: c.nombre, label: c.nombre })), { value: OTRO, label: 'Otro (especificar)…' }],
+      // Al elegir un concepto del catálogo, autocompleta la categoría.
+      derive: (v) => (v !== OTRO && catPorNombre[v] ? { categoria: catPorNombre[v] } : {}) },
+    { name: 'conceptoNuevo', label: 'Nuevo concepto', required: true, full: true, placeholder: 'Ej: Suscripción Figma',
+      hidden: (vals) => vals.concepto !== OTRO },
     { name: 'categoria', label: 'Categoría', type: 'select', options: categorias.map((c) => ({ value: c, label: c })) },
     { name: 'tipo', label: 'Tipo', type: 'select', options: [{ value: 'Indirecto', label: 'Indirecto' }, { value: 'Directo', label: 'Directo' }] },
     { name: 'proyectoId', label: 'Proyecto (opcional)', type: 'select', options: (proyectos ?? []).map((p) => ({ value: p.id, label: p.nombre })) },
@@ -51,6 +61,16 @@ export function Gastos() {
 
   const guardar = async (v: Record<string, any>) => {
     const payload: any = { ...v };
+    // Concepto "Otro": usamos el nombre nuevo y lo guardamos en el catálogo para reutilizarlo.
+    if (v.concepto === OTRO) {
+      const nuevo = String(v.conceptoNuevo ?? '').trim();
+      payload.concepto = nuevo;
+      const existe = catalogo.some((c) => c.nombre.toLowerCase() === nuevo.toLowerCase());
+      if (nuevo && !existe) {
+        try { await apiSend('conceptos', 'POST', { nombre: nuevo, categoria: v.categoria || 'Otros' }); reloadConceptos(); } catch { /* no bloquear el alta del gasto */ }
+      }
+    }
+    delete payload.conceptoNuevo;
     if (esGerente) { payload.personaId = (!v.atribucion || v.atribucion === 'empresa') ? null : v.atribucion; delete payload.atribucion; }
     if (editing) await apiSend(`gastos?id=${editing.id}`, 'PUT', payload);
     else await apiSend('gastos', 'POST', payload);
@@ -112,7 +132,11 @@ export function Gastos() {
       <FormModal
         title={editing ? 'Editar gasto' : 'Registrar gasto'}
         fields={fields}
-        initial={editing ? { ...editing, atribucion: editing.personaId ?? 'empresa' } : { categoria: 'Otros', tipo: 'Indirecto', atribucion: 'empresa' }}
+        initial={editing
+          ? { ...editing, atribucion: editing.personaId ?? 'empresa',
+              concepto: catPorNombre[editing.concepto] ? editing.concepto : OTRO,
+              conceptoNuevo: catPorNombre[editing.concepto] ? '' : editing.concepto }
+          : { categoria: 'Otros', tipo: 'Indirecto', atribucion: 'empresa', concepto: '', conceptoNuevo: '' }}
         open={open}
         onClose={() => setOpen(false)}
         onSubmit={guardar}

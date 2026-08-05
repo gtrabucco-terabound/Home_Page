@@ -52,6 +52,14 @@ const configs: Record<string, any> = {
         .where(and(...conds));
     },
   },
+  conceptos: {
+    table: schema.conceptoGasto, entidad: 'conceptos', roles: ['gerente', 'desarrollador'], writeRoles: ['gerente', 'desarrollador'],
+    pick: (b: any) => ({ nombre: b.nombre, categoria: b.categoria }),
+    list: async (s: any) => getDb().select({ id: schema.conceptoGasto.id, nombre: schema.conceptoGasto.nombre, categoria: schema.conceptoGasto.categoria })
+      .from(schema.conceptoGasto)
+      .where(and(eq(schema.conceptoGasto.tenantId, s.tenantId), isNull(schema.conceptoGasto.deletedAt), eq(schema.conceptoGasto.activo, true)))
+      .orderBy(asc(schema.conceptoGasto.categoria), asc(schema.conceptoGasto.nombre)),
+  },
   proyectos: {
     table: schema.proyectos, entidad: 'proyectos', roles: ['gerente', 'desarrollador', 'cliente'], writeRoles: ['gerente'],
     pick: (b: any) => ({ clienteId: b.clienteId, nombre: b.nombre, estado: b.estado, avance: b.avance != null ? Number(b.avance) : 0, responsable: b.responsable, inicio: b.inicio, fin: b.fin }),

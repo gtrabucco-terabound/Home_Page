@@ -141,6 +141,19 @@ export const gastos = pgTable('gastos', {
   deletedAt: timestamp('deleted_at', { withTimezone: true }),
 });
 
+// Catálogo de conceptos de gasto: cada concepto pertenece a una categoría.
+// Al elegir el concepto en el form, la categoría se autocompleta.
+export const conceptoGasto = pgTable('concepto_gasto', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: uuid('tenant_id').notNull().references(() => tenants.id),
+  nombre: text('nombre').notNull(),
+  categoria: categoriaGastoEnum('categoria').notNull().default('Otros'),
+  activo: boolean('activo').notNull().default(true),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
+});
+
 export const siteConfig = pgTable('site_config', {
   id: uuid('id').primaryKey().defaultRandom(),
   tenantId: uuid('tenant_id').notNull().references(() => tenants.id),
